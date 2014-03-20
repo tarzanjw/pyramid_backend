@@ -13,7 +13,7 @@
     <small>
       <div class="pull-right">
       % for cmd in view.actions:
-        <a href="${cmd['url']}" title="${cmd['label']}"><span class="glyphicon glyphicon-${cmd.get('icon', 'usd')}"></span></a>
+        <a href="${cmd['url']}" title="${cmd['label']}"><span class="glyphicon glyphicon-${cmd.get('icon', 'usd') or 'usd'}"></span></a>
       % endfor
       </div>
     </small>

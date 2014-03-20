@@ -2,10 +2,6 @@ __author__ = 'tarzan'
 
 import re
 import importlib
-from . import resources as _rsr
-from . import model as model_helper
-from . import views
-
 ADMIN_SITE_PATH = None
 
 def includeme(config):
@@ -16,6 +12,10 @@ def includeme(config):
     settings = config.get_settings()
     ADMIN_SITE_PATH = settings['pyramid_backend.admin_site']
     ADMIN_SITE_PATH = ADMIN_SITE_PATH.strip('/') + '/'
+
+    from . import resources as _rsr
+    from . import model as model_helper
+    from . import views
 
     route_pattern = ADMIN_SITE_PATH + '*traverse'
     config.add_route('admin_site', route_pattern, factory=_rsr.AdminSite)
