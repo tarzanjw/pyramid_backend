@@ -1,7 +1,7 @@
 __author__ = 'tarzan'
 
+import deform
 from .. import resources as _rsr
-from pyramid.view import view_config
 
 class ModelView(object):
 
@@ -63,3 +63,16 @@ class ModelView(object):
             'view': self,
         }
 
+    def action_create(self):
+        schema = self.backend_mgr.schema_cls()
+        form = deform.Form(schema, buttons=(deform.Button(title='Create'),))
+        try:
+            data = form.validate(self.request.POST.items())
+            obj = self.backend_mgr.create(data)
+        except deform.ValidationFailure as e:
+            pass
+
+        return {
+            'view': self,
+            "form": form,
+        }

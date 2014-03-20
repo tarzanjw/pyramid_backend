@@ -99,9 +99,11 @@ class AdminSite(object):
     def __getitem__(self, item):
         try:
             model = AdminSite.model_mappings[item]
-        except KeyError:
+        except KeyError as e:
             for model in model_helper.get_registered_models():
                 if model.__backend_manager__.slug == item:
                     AdminSite.model_mappings[item] = model
                     break
+            else:
+                raise e
         return model.__backend_manager__.ModelResource(self, item)

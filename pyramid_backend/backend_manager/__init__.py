@@ -1,15 +1,26 @@
 __author__ = 'tarzan'
 import re
 import inspect
+import importlib
 from pyramid.decorator import reify
-import resources
+
+_managers_factory = []
 
 def create_backend_manager(model):
     """
     create backend manager for a model
     :rtype Manager
     """
-    return Manager(model)
+    for mf in _managers_factory:
+        mgr = mf(model)
+        if mgr:
+            return mgr
+
+    raise NotImplementedError('Can not find backend manager for model "%s"' % model.__name__)
+
+def register_manager_factory(factory):
+    global _managers_factory
+    _managers_factory.append(factory)
 
 def get_manager(model):
     """
@@ -106,11 +117,21 @@ class Manager(object):
         return re.sub('([A-Z]+[a-z]+)', r' \1', cls_name).strip()
 
     @reify
+    def schema_cls(self):
+        try:
+            return self.model.__backend_schema__
+        except AttributeError:
+            pass
+        return None
+
+    @reify
     def ModelResource(self):
+        from pyramid_backend import resources
         return resources.model_resource_class(self.model)
 
     @reify
     def ObjectResource(self):
+        from pyramid_backend import resources
         return resources.object_resource_class(self.model)
 
     def configure_actions(self, actions):
@@ -121,3 +142,9 @@ class Manager(object):
         elif isinstance(actions, dict):
             actions = {k:(v if k not in actions else v if v else actions[k]) for k,v in actions}
         self.actions = actions
+
+    def create(self, data):
+        pass
+
+
+from .sqlalchemy import SQLAlchemyManager
