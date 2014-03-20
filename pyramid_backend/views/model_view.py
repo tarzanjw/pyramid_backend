@@ -37,9 +37,18 @@ class ModelView(object):
         actions = []
         for ca_name, ca in configured_actions.items():
             cxt = ca['context']
-            if self.is_current_context_object or issubclass(cxt, _rsr.ModelResource):
+            if issubclass(cxt, _rsr.ModelResource):
+                _label = ca['_label'] if '_label' in ca else (self.backend_mgr.display_name + '#' + ca_name)
                 actions.append({
-                    'url': _rsr.model_url(self.request, self.model, ca_name),
+                    'url': _rsr.model_url(self.request, self.model, ca.get('name', None)),
+                    'label': _label,
+                    'icon': ca['_icon'] if '_icon' in ca else None,
+                })
+            elif self.is_current_context_object:
+                _label = ca['_label'] if '_label' in ca else ('%s#' + ca_name)
+                _label = _label % self.context.object
+                actions.append({
+                    'url': _rsr.model_url(self.request, self.model, ca.get('name', None)),
                     'label': self.backend_mgr.model.__name__ + '#' + ca_name,
                     'icon': ca['_icon'] if '_icon' in ca else None,
                 })

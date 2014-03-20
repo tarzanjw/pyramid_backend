@@ -46,6 +46,7 @@ class ObjectResource(object):
     def __init__(self, parent, name):
         self.__parent__ = parent
         self.__name__ = name
+        self.object = object
 
     def __resource_url__(self, *args, **kwargs):
         return object_url(self.__model__, self.__name__)

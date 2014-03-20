@@ -41,6 +41,8 @@ class Manager(object):
             'attr': 'action_list',
             'renderer': 'pyramid_backend:templates/list.mak',
             'permission': 'list',
+            '_icon': 'list',
+            '_label': self.display_name + ' list',
         },
         'create': {
             'route_name': 'admin_site',
@@ -49,6 +51,8 @@ class Manager(object):
             'attr': 'action_create',
             'renderer': 'pyramid_backend:templates/create.mak',
             'permission': 'create',
+            '_icon': 'plus',
+            '_label': 'Create new ' + self.display_name,
         },
         'detail': {
             'route_name': 'admin_site',
@@ -56,6 +60,8 @@ class Manager(object):
             'attr': 'action_detail',
             'renderer': 'pyramid_backend:templates/detail.mak',
             'permission': 'detail',
+            '_icon': 'eye-open',
+            '_label': 'View %s detail',
         },
         'update': {
             'route_name': 'admin_site',
@@ -64,6 +70,8 @@ class Manager(object):
             'attr': 'action_update',
             'renderer': 'pyramid_backend:templates/update.mak',
             'permission': 'update',
+            '_icon': 'pencil',
+            '_label': 'Update %s',
         },
         'delete': {
             'route_name': 'admin_site',
@@ -72,6 +80,8 @@ class Manager(object):
             'attr': 'action_delete',
             'renderer': 'pyramid_backend:templates/update.mak',
             'permission': 'delete',
+            '_icon': 'remove',
+            '_label': 'Delete %s',
         },
     }
 
@@ -84,6 +94,16 @@ class Manager(object):
         # implement camel case to underscore
         s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', cls_name)
         return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+    @reify
+    def display_name(self):
+        try:
+            return self.model.__backend_display_name__
+        except AttributeError:
+            pass
+        cls_name = self.model.__name__
+        # implement camel case to words
+        return re.sub('([A-Z]+[a-z]+)', r' \1', cls_name).strip()
 
     @reify
     def ModelResource(self):
