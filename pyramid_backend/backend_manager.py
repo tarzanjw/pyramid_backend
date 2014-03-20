@@ -30,6 +30,7 @@ class Manager(object):
         """
         assert inspect.isclass(model)
         self.model = model
+        self.actions = {}
 
     @reify
     def default_actions(self):
@@ -91,3 +92,12 @@ class Manager(object):
     @reify
     def ObjectResource(self):
         return resources.object_resource_class(self.model)
+
+    def configure_actions(self, actions):
+        if actions is None:
+            actions = self.default_actions
+        elif isinstance(actions, (list, tuple,)):
+            actions = {k:v for k,v in self.default_actions.items() if k in actions}
+        elif isinstance(actions, dict):
+            actions = {k:(v if k not in actions else v if v else actions[k]) for k,v in actions}
+        self.actions = actions

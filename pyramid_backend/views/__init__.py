@@ -28,14 +28,9 @@ def add_model_view(config, model, view_cls=None, actions=None):
     model_helper.register_model(model)
 
     if view_cls is None:
-        view_cls = model_view.model_view_class(model)
-    default_actions = model.__backend_manager__.default_actions
-    if actions is None:
-        actions = model.__backend_manager__.default_actions
-    elif isinstance(actions, (list, tuple,)):
-        actions = {k:v for k,v in default_actions.items() if k in actions}
-    elif isinstance(actions, dict):
-        actions = {k:(v if k not in actions else v if v else actions[k]) for k,v in actions}
-    view_cls.configure_actions(actions)
-    for a_conf in actions.values():
-        config.add_view(view=view_cls, **a_conf)
+        view_cls = model_view.ModelView
+    mgr = model.__backend_manager__
+    """:type : pyramid_backend.backend_manager.Manager"""
+    mgr.configure_actions(actions)
+    for a_conf in mgr.actions.values():
+        config.add_view(view=view_cls, **{k:v for k,v in a_conf.items() if not k.startswith('_')})
