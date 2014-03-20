@@ -37,10 +37,10 @@ def get_manager(model):
 class Manager(object):
     def __init__(self, model):
         """
-        :type model: object
+        :type model: class
         """
         assert inspect.isclass(model)
-        self.model = model
+        self.Model = model
         self.actions = {}
 
     @reify
@@ -99,9 +99,9 @@ class Manager(object):
     @reify
     def slug(self):
         """get slug for current model"""
-        if hasattr(self.model, '__backend_slug__'):
-            return self.model.__backend_slug__
-        cls_name = self.model.__name__
+        if hasattr(self.Model, '__backend_slug__'):
+            return self.Model.__backend_slug__
+        cls_name = self.Model.__name__
         # implement camel case to underscore
         s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', cls_name)
         return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
@@ -109,30 +109,38 @@ class Manager(object):
     @reify
     def display_name(self):
         try:
-            return self.model.__backend_display_name__
+            return self.Model.__backend_display_name__
         except AttributeError:
             pass
-        cls_name = self.model.__name__
+        cls_name = self.Model.__name__
         # implement camel case to words
         return re.sub('([A-Z]+[a-z]+)', r' \1', cls_name).strip()
 
     @reify
     def schema_cls(self):
         try:
-            return self.model.__backend_schema__
+            return self.Model.__backend_schema__
         except AttributeError:
             pass
         return None
 
     @reify
+    def id_attr(self):
+        try:
+            return self.Model.__backend_id_attr__
+        except AttributeError:
+            pass
+        return 'id'
+
+    @reify
     def ModelResource(self):
         from pyramid_backend import resources
-        return resources.model_resource_class(self.model)
+        return resources.model_resource_class(self.Model)
 
     @reify
     def ObjectResource(self):
         from pyramid_backend import resources
-        return resources.object_resource_class(self.model)
+        return resources.object_resource_class(self.Model)
 
     def configure_actions(self, actions):
         if actions is None:
@@ -143,8 +151,11 @@ class Manager(object):
             actions = {k:(v if k not in actions else v if v else actions[k]) for k,v in actions}
         self.actions = actions
 
+    def object_id(self, obj):
+        return getattr(obj, self.id_attr)
+
     def create(self, data):
-        pass
+        raise NotImplementedError()
 
 
 from .sqlalchemy import SQLAlchemyManager

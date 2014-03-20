@@ -23,15 +23,20 @@ def model_url(request, model, action=None, query=None):
         url += '?' + query
     return request.relative_url(url, True)
 
-def object_url(obj, id_value=None):
+def object_url(request, obj, action=None, query=None, id=None):
     if isinstance(obj, type):
         model = obj
-        assert id_value is not None
     else:
         model = obj.__class__
-        id_value = obj.id
-    murl = model_url(model)
-    return '%s%s/' % (murl, id_value)
+        id = model.__backend_manager__.object_id(obj)
+        url = ADMIN_SITE_PATH + model.__backend_manager__.slug + '/' + str(id)
+        if action:
+            url += '/' + action
+        if query and isinstance(query, dict):
+            query = urllib.urlencode(query)
+        if query:
+            url += '?' + query
+    return request.relative_url(url, True)
 
 class ModelResource(object):
     model = None

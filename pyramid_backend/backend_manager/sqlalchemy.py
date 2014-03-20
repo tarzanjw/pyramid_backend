@@ -25,4 +25,10 @@ def factory(config):
     return _create_manager
 
 class SQLAlchemyManager(Manager):
-    pass
+    def create(self, data):
+        obj = self.Model()
+        for k,v in data.items():
+            setattr(obj, k, v)
+        DBSession.add(obj)
+        DBSession.flush()
+        return obj

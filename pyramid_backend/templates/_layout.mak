@@ -7,6 +7,15 @@
 %>
 <%inherit file="${get_layout_file(context)}"/>
 
+<%block name="flashes_block">
+<% messages = request.session.pop_flash('pbackend') %>
+% if messages:
+    % for message in messages:
+        <div class="alert alert-success">${message}</div>
+    % endfor
+% endif
+</%block>
+
 <%block name="page_header">
 <legend>
     <%block name="page_title">There's no title here</%block>

@@ -1,6 +1,7 @@
 __author__ = 'tarzan'
 
 import deform
+from pyramid.httpexceptions import HTTPFound
 from .. import resources as _rsr
 
 class ModelView(object):
@@ -66,13 +67,22 @@ class ModelView(object):
     def action_create(self):
         schema = self.backend_mgr.schema_cls()
         form = deform.Form(schema, buttons=(deform.Button(title='Create'),))
-        try:
-            data = form.validate(self.request.POST.items())
-            obj = self.backend_mgr.create(data)
-        except deform.ValidationFailure as e:
-            pass
+
+        if self.request.method == 'POST':
+            try:
+                data = form.validate(self.request.POST.items())
+                obj = self.backend_mgr.create(data)
+                self.request.session.flash(u'"%s" was created successful.' % obj, queue='pbackend')
+                return HTTPFound(_rsr.object_url(self.request, obj))
+            except deform.ValidationFailure as e:
+                pass
 
         return {
             'view': self,
             "form": form,
+        }
+
+    def action_detail(self):
+        return {
+
         }
