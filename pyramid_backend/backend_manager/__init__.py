@@ -102,6 +102,7 @@ class Manager(object):
             'permission': 'delete',
             '_icon': 'remove',
             '_label': 'Delete %s',
+            '_onclick': "return confirm('Do you want to delete &quot;%s&quot;?')",
         },
     }
 
@@ -176,6 +177,9 @@ class Manager(object):
         raise NotImplementedError()
 
     def update(self, obj, data):
+        raise NotImplementedError()
+
+    def delete(self, obj):
         raise NotImplementedError()
 
     def fetch_objects(self, filters, page=1):

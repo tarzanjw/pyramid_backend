@@ -1,5 +1,6 @@
 <%! import markupsafe %>
 <%inherit file="_layout.mak"/>
+<%namespace file="_layout.mak" import="cmd_button"/>
 
 <%block name="page_title">${request.context.model.__backend_manager__.display_name} list</%block>
 
@@ -18,21 +19,8 @@
         <tr>
             <td class="col-type-commands">
                 % for cmd in view.object_actions(e):
-                <a href="${cmd['url']}" title="${cmd['label']}"><span class="glyphicon glyphicon-${cmd.get('icon', 'usd') or 'usd'}"></span></a>
+                ${cmd_button(cmd)}
                 % endfor
-##                % if 'detail' in view.actions:
-##                <a href="${request.resource_url(request.context[e.id])}">
-##                    <span class="glyphicon glyphicon-eye-open"></span></a>
-##                % endif
-##                % if 'update' in view.actions:
-##                <a href="${request.resource_url(request.context[e.id], 'update')}">
-##                    <span class="glyphicon glyphicon-edit"></span></a>
-##                % endif
-##                % if 'delete' in view.actions:
-##                <a class="cmd-delete" href="${request.resource_url(request.context[e.id], 'delete')}"
-##                   data-message="Do you want to delete ${view.Object.__name__} ${e}">
-##                    <span class="glyphicon glyphicon-remove"></span></a>
-##                % endif
             </td>
         % for name in columns:
             <%

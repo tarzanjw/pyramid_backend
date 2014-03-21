@@ -73,6 +73,10 @@ class SQLAlchemyManager(Manager):
         DBSession.flush()
         return obj
 
+    def delete(self, obj):
+        DBSession.delete(obj)
+        DBSession.flush()
+
     def fetch_objects(self, filters, page=1):
         query = DBSession.query(self.Model)
         for name, value in filters.items():

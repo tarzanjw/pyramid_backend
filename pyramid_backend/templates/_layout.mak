@@ -23,13 +23,23 @@ td.datatype-datetime {text-align: right}
 % endif
 </%block>
 
+<%def name="cmd_button(cmd)">
+<% print cmd %>
+<a href="${cmd['url']}"
+    title="${cmd['label']}"
+    % if 'onclick' in cmd and cmd['onclick']:
+    onclick="${cmd['onclick']|n}"
+    % endif
+        ><span class="glyphicon glyphicon-${cmd.get('icon', 'usd') or 'usd'}"></span></a>
+</%def>
+
 <%block name="page_header">
 <legend>
     <%block name="page_title">There's no title here</%block>
     <small>
       <div class="pull-right">
       % for cmd in view.toolbar_actions:
-        <a href="${cmd['url']}" title="${cmd['label']}"><span class="glyphicon glyphicon-${cmd.get('icon', 'usd') or 'usd'}"></span></a>
+        ${cmd_button(cmd)}
       % endfor
       </div>
     </small>

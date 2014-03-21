@@ -78,10 +78,12 @@ class ModelView(object):
             if issubclass(cxt, _rsr.ObjectResource):
                 _label = ca['_label'] if '_label' in ca else ('%s#' + ca_name)
                 _label = _label % obj
+                _onclick = (ca['_onclick'] % obj) if '_onclick' in ca else None
                 actions.append({
                     'url': _rsr.object_url(self.request, obj, ca.get('name', None)),
                     'label': _label,
                     'icon': ca['_icon'] if '_icon' in ca else None,
+                    'onclick': _onclick,
                 })
         return actions
 
@@ -192,3 +194,9 @@ class ModelView(object):
             'obj': self.context.object,
             'backend_mgr': self.backend_mgr,
         }
+
+    def action_delete(self):
+        obj = self.context.object
+        self.backend_mgr.delete(obj)
+        self.request.session.flash(u'%s#%s was history!' % (self.backend_mgr.display_name, obj))
+        return HTTPFound(_rsr.model_url(self.request, self.model))
