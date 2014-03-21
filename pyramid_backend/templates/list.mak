@@ -1,6 +1,5 @@
-<%! import markupsafe %>
 <%inherit file="_layout.mak"/>
-<%namespace file="_layout.mak" import="cmd_button"/>
+<%namespace file="_layout.mak" import="cmd_button, data_cell"/>
 
 <%block name="page_title">${request.context.model.__backend_manager__.display_name} list</%block>
 
@@ -26,17 +25,8 @@
             <%
                 val = e.__getattribute__(name)
                 val_type = view.cell_datatype(val)
-
-                val = unicode(markupsafe.escape(val))
-                if val_type == 'longtext':
-                    val = '<br>'.join(val.splitlines())
-                elif val_type == 'none':
-                    val = '<code>' + val + '</code>'
-                elif val_type == 'bool':
-                    val = '<span class="label label-success">True</span>' if val else \
-                        '<span class="label label-default">False</span>'
             %>
-            <td class="datatype-${val_type}">${val|n}</td>
+            <td class="datatype-${val_type}">${data_cell(val)}</td>
         % endfor
         </tr>
     % endfor

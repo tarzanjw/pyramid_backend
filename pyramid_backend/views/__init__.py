@@ -1,10 +1,10 @@
 __author__ = 'tarzan'
 
 from pyramid.view import view_config
-import pyramid_backend as pb
+from datetime import datetime
 from pyramid_backend import resources as _rsr
 from pyramid_backend import model as model_helper
-from . import model_view
+
 
 @view_config(route_name='admin_site', context=_rsr.AdminSite,
              renderer='pyramid_backend:templates/index.mak')
@@ -21,6 +21,20 @@ def admin_site_home_view(context, request):
         ) for m in models]
     }
 
+def cell_datatype(val):
+    if val is None:
+        return 'none'
+    if isinstance(val, bool):
+        return 'bool'
+    if isinstance(val, (int, long, float)):
+        return 'number'
+    if isinstance(val, datetime):
+        return 'datetime'
+    if isinstance(val, basestring) and len(val) > 40:
+         return 'longtext'
+    return 'generic'
+
+from . import model_view
 def add_model_view(config, model, view_cls=None, actions=None):
     """
     :type config: pyramid.config.Configurator

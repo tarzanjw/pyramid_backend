@@ -1,5 +1,6 @@
 <%! import markupsafe %>
 <%inherit file="_layout.mak" />
+<%namespace file="_layout.mak" import="data_cell" />
 
 <style type="text/css">
 .object-detail .row {
@@ -18,20 +19,11 @@
 <%
     val = obj.__getattribute__(attr_name)
     val_type = view.cell_datatype(val)
-
-    val = unicode(markupsafe.escape(val))
-    if val_type == 'longtext':
-        val = u'<br>'.join(val.splitlines())
-    elif val_type == 'none':
-        val = u'<code>' + val + u'</code>'
-    elif val_type == 'bool':
-        val = u'<span class="label label-success">True</span>' if val else \
-            u'<span class="label label-default">False</span>'
 %>
 <div class="object-detail">
     <div class="row col-type-general">
         <div class="col-lg-3 name">${label}</div>
-        <div class="col-lg-9 value datatype-${val_type}">${val|n}</div>
+        <div class="col-lg-9 value datatype-${val_type}">${data_cell(val)}</div>
     </div>
 </div>
 % endfor

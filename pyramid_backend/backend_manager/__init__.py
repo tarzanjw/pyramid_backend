@@ -11,9 +11,11 @@ def _name_to_underscore(name):
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 def _name_to_words(name):
-    name = re.sub('([A-Z]+[a-z]+)', r' \1', name).strip()
+    name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     words = re.split('[_\s]+', name)
-    return ' '.join([w.capitalize() for w in words])
+    def capitalize(s):
+        return s[0].upper() + s[1:]
+    return ' '.join([capitalize(w) for w in words])
 
 def create_backend_manager(model):
     """

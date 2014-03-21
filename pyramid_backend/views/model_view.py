@@ -5,6 +5,7 @@ from datetime import datetime
 import deform
 from webhelpers.paginate import Page
 from pyramid.httpexceptions import HTTPFound
+from . import cell_datatype
 from .. import resources as _rsr
 
 class ModelView(object):
@@ -36,17 +37,7 @@ class ModelView(object):
         return self.model.__backend_manager__
 
     def cell_datatype(self, val):
-        if val is None:
-            return 'none'
-        if isinstance(val, bool):
-            return 'bool'
-        if isinstance(val, (int, long, float)):
-            return 'number'
-        if isinstance(val, datetime):
-            return 'datetime'
-        if isinstance(val, basestring) and len(val) > 40:
-             return 'longtext'
-        return 'generic'
+        return cell_datatype(val)
 
     @property
     def toolbar_actions(self):

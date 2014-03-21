@@ -1,4 +1,6 @@
 <%!
+    import markupsafe
+    from pyramid_backend.views import cell_datatype
     def get_layout_file(context):
         try:
             return context['main_template'].uri
@@ -30,6 +32,21 @@ td.datatype-datetime {text-align: right}
     onclick="${cmd['onclick']|n}"
     % endif
         ><span class="glyphicon glyphicon-${cmd.get('icon', 'usd') or 'usd'}"></span></a>
+</%def>
+
+<%def name="data_cell(val)">
+<%
+val_type = cell_datatype(val)
+val = unicode(markupsafe.escape(val))
+if val_type == 'longtext':
+    val = '<br>'.join(val.splitlines())
+elif val_type == 'none':
+    val = '<code>' + val + '</code>'
+elif val_type == 'bool':
+    val = '<span class="label label-success">True</span>' if val else \
+        '<span class="label label-default">False</span>'
+%>
+${val|n}
 </%def>
 
 <%block name="page_header">
