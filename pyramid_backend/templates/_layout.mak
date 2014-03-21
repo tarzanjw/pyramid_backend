@@ -1,6 +1,7 @@
 <%!
     import markupsafe
     from pyramid_backend.views import cell_datatype
+    from pyramid_backend import model as model_hepler, resources as _rsr
     def get_layout_file(context):
         try:
             return context['main_template'].uri
@@ -37,7 +38,8 @@ td.datatype-datetime {text-align: right}
 <%def name="data_cell(val)">
 <%
 val_type = cell_datatype(val)
-val = unicode(markupsafe.escape(val))
+raw_val = val
+val = unicode(markupsafe.escape(raw_val))
 if val_type == 'longtext':
     val = '<br>'.join(val.splitlines())
 elif val_type == 'none':
@@ -45,6 +47,8 @@ elif val_type == 'none':
 elif val_type == 'bool':
     val = '<span class="label label-success">True</span>' if val else \
         '<span class="label label-default">False</span>'
+elif model_hepler.is_registered_model(raw_val):
+    val = '<a href="%s">%s</a>' % (_rsr.object_url(request, raw_val), val)
 %>
 ${val|n}
 </%def>

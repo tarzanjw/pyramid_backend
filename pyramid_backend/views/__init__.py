@@ -2,6 +2,7 @@ __author__ = 'tarzan'
 
 from pyramid.view import view_config
 from datetime import datetime
+import inspect
 from pyramid_backend import resources as _rsr
 from pyramid_backend import model as model_helper
 
@@ -30,8 +31,10 @@ def cell_datatype(val):
         return 'number'
     if isinstance(val, datetime):
         return 'datetime'
-    if isinstance(val, basestring) and len(val) > 40:
-         return 'longtext'
+    if isinstance(val, basestring):
+        return 'longtext' if len(val) > 40 else 'text'
+    if inspect.isclass(type(val)):
+        return 'class'
     return 'generic'
 
 from . import model_view

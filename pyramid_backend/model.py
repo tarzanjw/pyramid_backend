@@ -1,5 +1,6 @@
 __author__ = 'tarzan'
 
+import inspect
 from .backend_manager import create_backend_manager
 
 _registered_models = [
@@ -22,6 +23,16 @@ def get_registered_model(model):
         if m is model:
             return m
     raise NotImplementedError('%s model has not been implemented' % model.__name__)
+
+def is_registered_model(obj):
+    print obj, type(obj)
+    if not inspect.isclass(obj):
+        obj = type(obj)
+        print obj
+        if not inspect.isclass(obj):
+            return False
+    print obj
+    return obj in _registered_models
 
 def register_model(model):
     global _registered_models
