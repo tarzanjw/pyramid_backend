@@ -111,6 +111,7 @@ class Manager(object):
         'schema_cls',
         'id_attr',
         'list__column_names_to_display',
+        'detail__column_names_to_display',
         'list__items_per_page',
     ]
 
@@ -139,6 +140,12 @@ class Manager(object):
 
     @property
     def __default_list__column_names_to_display__(self):
+        columns = dict(zip(dir(self.Model), dir(self.Model)))
+        columns[self.id_attr] = '#'
+        return columns
+
+    @property
+    def __default_detail__column_names_to_display__(self):
         columns = dict(zip(dir(self.Model), dir(self.Model)))
         columns[self.id_attr] = '#'
         return columns
@@ -172,6 +179,9 @@ class Manager(object):
         raise NotImplementedError()
 
     def count_objects(self, filters):
+        raise NotImplementedError()
+
+    def find_object(self, id_value):
         raise NotImplementedError()
 
 

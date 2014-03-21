@@ -42,16 +42,37 @@ class ModelResource(object):
     model = None
 
     def __init__(self, parent, name):
+        """
+        :type parent: AdminSite
+        """
         self.__parent__ = parent
         self.__name__ = name
+        self.request = parent.request
+
+    @property
+    def backend_mgr(self):
+        """
+        :rtype : pyramid_backend.backend_manager.Manager
+        """
+        return self.model.__backend_manager__
+
+    def __getitem__(self, id_value):
+        obj = self.backend_mgr.find_object(id_value)
+        if obj:
+            return self.backend_mgr.ObjectResource(self, id_value, obj)
+        raise KeyError('%s#%s not found' % (self.backend_mgr.display_name, id_value))
 
 class ObjectResource(object):
     url = '#'
 
-    def __init__(self, parent, name):
+    def __init__(self, parent, name, object):
+        """
+        :type parent: ModelResource
+        """
         self.__parent__ = parent
         self.__name__ = name
-        self.object = None
+        self.request = parent.request
+        self.object = object
 
     def __resource_url__(self, *args, **kwargs):
         return object_url(self.__model__, self.__name__)

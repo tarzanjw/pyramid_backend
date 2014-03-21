@@ -8,9 +8,10 @@
 <%inherit file="${get_layout_file(context)}"/>
 
 <style type="text/css">
-.table-objects td {font-family: Monaco,Menlo,Consolas,"Courier New",monospace; font-size:90%;}
-.table-objects .datatype-number {text-align: right}
-.table-objects .datatype-datetime {text-align: right}
+.table-objects td, .object-detail {font-family: Monaco,Menlo,Consolas,"Courier New",monospace; font-size:90%;}
+td.datatype-number {text-align: right}
+td.datatype-datetime {text-align: right}
+.datatype-bool {font-weight: bold; font-style: italic}
 </style>
 
 <%block name="flashes_block">

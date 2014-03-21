@@ -36,8 +36,11 @@ class ModelView(object):
         return self.model.__backend_manager__
 
     def cell_datatype(self, val):
+        print val, type(val)
         if val is None:
             return 'none'
+        if isinstance(val, bool):
+            return 'bool'
         if isinstance(val, (int, long, float)):
             return 'number'
         if isinstance(val, datetime):
@@ -158,5 +161,7 @@ class ModelView(object):
 
     def action_detail(self):
         return {
-
+            'view': self,
+            'obj': self.context.object,
+            'backend_mgr': self.backend_mgr,
         }
