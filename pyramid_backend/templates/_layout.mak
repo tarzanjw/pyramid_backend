@@ -52,3 +52,11 @@ td.datatype-datetime {text-align: right}
 % endif
 </%block>
 ${next.body()}
+
+<script type="text/javascript">
+jQuery(function ($) {
+    $('form.deform button[name=cancel]').click(function (e) {
+        history.go(-1)
+    })
+})
+</script>

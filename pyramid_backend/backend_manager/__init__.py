@@ -175,6 +175,9 @@ class Manager(object):
     def create(self, data):
         raise NotImplementedError()
 
+    def update(self, obj, data):
+        raise NotImplementedError()
+
     def fetch_objects(self, filters, page=1):
         raise NotImplementedError()
 

@@ -143,9 +143,11 @@ class ModelView(object):
 
     def action_create(self):
         schema = self.backend_mgr.schema_cls()
-        form = deform.Form(schema, buttons=(deform.Button(title='Create'),))
+        form = deform.Form(schema,
+                           buttons=(deform.Button(title='Create'),
+                                    deform.Button(title='Cancel', type='reset', name='cancel')))
 
-        if self.request.method == 'POST':
+        if 'submit' in self.request.POST:
             try:
                 data = form.validate(self.request.POST.items())
                 obj = self.backend_mgr.create(data)
@@ -156,6 +158,31 @@ class ModelView(object):
 
         return {
             'view': self,
+            "form": form,
+        }
+
+    def action_update(self):
+        obj = self.context.object
+        schema = self.backend_mgr.schema_cls()
+        appstruct = {c.name:obj.__getattribute__(c.name) for c in schema.children}
+        form = deform.Form(schema,
+                           appstruct=appstruct,
+                           buttons=(deform.Button(title='Update'),
+                                    deform.Button(title='Cancel', type='reset', name='cancel')))
+
+        print self.request.POST
+        if 'submit' in self.request.POST:
+            try:
+                data = form.validate(self.request.POST.items())
+                obj = self.backend_mgr.update(obj, data)
+                self.request.session.flash(u'"%s" was updated successful.' % obj, queue='pbackend')
+                return HTTPFound(_rsr.object_url(self.request, obj))
+            except deform.ValidationFailure as e:
+                pass
+
+        return {
+            'view': self,
+            'obj': obj,
             "form": form,
         }
 

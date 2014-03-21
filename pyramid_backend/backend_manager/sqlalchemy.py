@@ -66,6 +66,13 @@ class SQLAlchemyManager(Manager):
         DBSession.flush()
         return obj
 
+    def update(self, obj, data):
+        for k,v in data.items():
+            setattr(obj, k, v)
+        DBSession.merge(obj)
+        DBSession.flush()
+        return obj
+
     def fetch_objects(self, filters, page=1):
         query = DBSession.query(self.Model)
         for name, value in filters.items():
