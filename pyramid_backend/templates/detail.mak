@@ -25,7 +25,8 @@
     elif val_type == 'none':
         val = '<code>' + val + '</code>'
     elif val_type == 'bool':
-        val = 'True' if val else 'False'
+        val = '<span class="label label-success">True</span>' if val else \
+            '<span class="label label-default">False</span>'
     val = unicode(val)
 %>
 <div class="object-detail">
