@@ -6,6 +6,15 @@ from pyramid.decorator import reify
 
 _managers_factory = []
 
+def _name_to_underscore(name):
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+def _name_to_words(name):
+    name = re.sub('([A-Z]+[a-z]+)', r' \1', name).strip()
+    words = re.split('[_\s]+', name)
+    return ' '.join([w.capitalize() for w in words])
+
 def create_backend_manager(model):
     """
     create backend manager for a model
@@ -96,41 +105,43 @@ class Manager(object):
         },
     }
 
-    @reify
-    def slug(self):
-        """get slug for current model"""
-        if hasattr(self.Model, '__backend_slug__'):
-            return self.Model.__backend_slug__
-        cls_name = self.Model.__name__
-        # implement camel case to underscore
-        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', cls_name)
-        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+    _configurable_properties = [
+        'slug',
+        'display_name',
+        'schema_cls',
+        'id_attr',
+        'list__column_names_to_display',
+        'list__items_per_page',
+    ]
 
-    @reify
-    def display_name(self):
-        try:
-            return self.Model.__backend_display_name__
-        except AttributeError:
-            pass
-        cls_name = self.Model.__name__
-        # implement camel case to words
-        return re.sub('([A-Z]+[a-z]+)', r' \1', cls_name).strip()
+    def __getattribute__(self, name):
+        if name in Manager._configurable_properties:
+            try:
+                val = getattr(self.Model, '__backend_' + name + '__')
+            except AttributeError:
+                val = getattr(self, '__default_' + name + '__')
+            setattr(self, name, val)
+            return val
+        return super(Manager, self).__getattribute__(name)
 
-    @reify
-    def schema_cls(self):
-        try:
-            return self.Model.__backend_schema__
-        except AttributeError:
-            pass
-        return None
+    __default_schema_cls__ = None
+    __default_id_attr__ = 'id'
+    __default_list__items_per_page__ = 2
 
-    @reify
-    def id_attr(self):
-        try:
-            return self.Model.__backend_id_attr__
-        except AttributeError:
-            pass
-        return 'id'
+    @property
+    def __default_slug__(self):
+        return _name_to_underscore(self.Model.__name__)
+
+
+    @property
+    def __default_display_name__(self):
+        return _name_to_words(self.Model.__name__)
+
+    @property
+    def __default_list__column_names_to_display__(self):
+        columns = dict(zip(dir(self.Model), dir(self.Model)))
+        columns[self.id_attr] = '#'
+        return columns
 
     @reify
     def ModelResource(self):
@@ -155,6 +166,12 @@ class Manager(object):
         return getattr(obj, self.id_attr)
 
     def create(self, data):
+        raise NotImplementedError()
+
+    def fetch_objects(self, filters, page=1):
+        raise NotImplementedError()
+
+    def count_objects(self, filters):
         raise NotImplementedError()
 
 

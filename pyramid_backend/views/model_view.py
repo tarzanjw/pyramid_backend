@@ -1,6 +1,9 @@
 __author__ = 'tarzan'
 
+import urllib
+from datetime import datetime
 import deform
+from webhelpers.paginate import Page
 from pyramid.httpexceptions import HTTPFound
 from .. import resources as _rsr
 
@@ -32,8 +35,26 @@ class ModelView(object):
         """
         return self.model.__backend_manager__
 
+    def cell_datatype(self, val):
+        if val is None:
+            return 'none'
+        if isinstance(val, (int, long, float)):
+            return 'number'
+        if isinstance(val, datetime):
+            return 'datetime'
+        if isinstance(val, basestring) and len(val) > 40:
+             return 'longtext'
+        return 'generic'
+
     @property
-    def actions(self):
+    def toolbar_actions(self):
+        actions = self.model_actions
+        if isinstance(self.context, self.backend_mgr.ObjectResource):
+            actions += self.object_actions(self.context.object)
+        return actions
+
+    @property
+    def model_actions(self):
         configured_actions = self.backend_mgr.actions
         actions = []
         for ca_name, ca in configured_actions.items():
@@ -45,12 +66,18 @@ class ModelView(object):
                     'label': _label,
                     'icon': ca['_icon'] if '_icon' in ca else None,
                 })
-            elif self.is_current_context_object:
+        return actions
+
+    def object_actions(self, obj):
+        actions = []
+        for ca_name, ca in self.backend_mgr.actions.items():
+            cxt = ca['context']
+            if issubclass(cxt, _rsr.ObjectResource):
                 _label = ca['_label'] if '_label' in ca else ('%s#' + ca_name)
-                _label = _label % self.context.object
+                _label = _label % obj
                 actions.append({
-                    'url': _rsr.model_url(self.request, self.model, ca.get('name', None)),
-                    'label': self.backend_mgr.model.__name__ + '#' + ca_name,
+                    'url': _rsr.object_url(self.request, obj, ca.get('name', None)),
+                    'label': _label,
                     'icon': ca['_icon'] if '_icon' in ca else None,
                 })
         return actions
@@ -59,9 +86,56 @@ class ModelView(object):
     def breadcrumbs(self):
         return []
 
+    def list_page_url(self, page, partial=False):
+        params = self.request.GET.copy()
+        params["_page"] = page
+        if partial:
+            params["partial"] = "1"
+        qs = urllib.urlencode(params, True)
+        return "%s?%s" % (self.request.path, qs)
+
     def action_list(self):
+        cur_page = int(self.request.params.get("_page", 1))
+        # objs = self.DBSession.query(self.Object)
+        # attr_names = self.obj_attr_names
+        #
+        # for name, value in self.request.params.mixed().iteritems():
+        #     if name in attr_names:
+        #         objs = objs.filter(getattr(self.Object, name).like("%%%s%%" % value))
+        #
+        # from sqlalchemy import func
+        # objs = objs.order_by(self.Object.id.desc())
+        # item_count = self.DBSession.query(func.count(self.Object.id))
+        # for name, value in self.request.params.mixed().iteritems():
+        #     if name in attr_names:
+        #         item_count = item_count.filter(getattr(self.Object, name).like("%%%s%%" % value))
+        # item_count = item_count.scalar()
+        #
+        # page = Page(objs, page=cur_page,
+        #             item_count=item_count,
+        #             items_per_page=self.list__items_per_page,
+        #             url=PageURL_WebOb(self.request)
+        #             )
+        #
+        # return {
+        #     "page": page,
+        #     "view": self,
+        # }
+        filters = {k:v for k,v in self.request.GET.items() if not k.startswith('_')}
+        objects = self.backend_mgr.fetch_objects(page=cur_page, filters=filters)
+        objects = list(objects)
+        objects_count = self.backend_mgr.count_objects(filters)
+        # objects_count = objects_count * 20
+        page = Page(objects, page=cur_page,
+                    item_count=objects_count,
+                    items_per_page=self.backend_mgr.list__items_per_page,
+                    url=self.list_page_url,
+                    presliced_list=True,
+                    )
         return {
             'view': self,
+            'columns': self.backend_mgr.list__column_names_to_display,
+            'page': page,
         }
 
     def action_create(self):

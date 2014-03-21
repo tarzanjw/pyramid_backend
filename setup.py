@@ -8,6 +8,7 @@ README = open(os.path.join(here, 'README.md')).read()
 requires = [
     'pyramid >= 1.5a1',
     'pyramid_layout',
+    'webhelpers',
     ]
 
 setup(name='pyramid_backend',

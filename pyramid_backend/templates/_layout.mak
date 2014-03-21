@@ -7,6 +7,12 @@
 %>
 <%inherit file="${get_layout_file(context)}"/>
 
+<style type="text/css">
+.table-objects td {font-family: Monaco,Menlo,Consolas,"Courier New",monospace; font-size:90%;}
+.table-objects .datatype-number {text-align: right}
+.table-objects .datatype-datetime {text-align: right}
+</style>
+
 <%block name="flashes_block">
 <% messages = request.session.pop_flash('pbackend') %>
 % if messages:
@@ -21,7 +27,7 @@
     <%block name="page_title">There's no title here</%block>
     <small>
       <div class="pull-right">
-      % for cmd in view.actions:
+      % for cmd in view.toolbar_actions:
         <a href="${cmd['url']}" title="${cmd['label']}"><span class="glyphicon glyphicon-${cmd.get('icon', 'usd') or 'usd'}"></span></a>
       % endfor
       </div>
