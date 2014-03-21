@@ -27,12 +27,14 @@
                 val = e.__getattribute__(name)
                 val_type = view.cell_datatype(val)
 
-                val = str(markupsafe.escape(val))
+                val = unicode(markupsafe.escape(val))
                 if val_type == 'longtext':
                     val = '<br>'.join(val.splitlines())
                 elif val_type == 'none':
                     val = '<code>' + val + '</code>'
-                val = unicode(val)
+                elif val_type == 'bool':
+                    val = '<span class="label label-success">True</span>' if val else \
+                        '<span class="label label-default">False</span>'
             %>
             <td class="datatype-${val_type}">${val|n}</td>
         % endfor

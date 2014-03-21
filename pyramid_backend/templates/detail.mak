@@ -19,15 +19,14 @@
     val = obj.__getattribute__(attr_name)
     val_type = view.cell_datatype(val)
 
-    val = str(markupsafe.escape(val))
+    val = unicode(markupsafe.escape(val))
     if val_type == 'longtext':
-        val = '<br>'.join(val.splitlines())
+        val = u'<br>'.join(val.splitlines())
     elif val_type == 'none':
-        val = '<code>' + val + '</code>'
+        val = u'<code>' + val + u'</code>'
     elif val_type == 'bool':
-        val = '<span class="label label-success">True</span>' if val else \
-            '<span class="label label-default">False</span>'
-    val = unicode(val)
+        val = u'<span class="label label-success">True</span>' if val else \
+            u'<span class="label label-default">False</span>'
 %>
 <div class="object-detail">
     <div class="row col-type-general">

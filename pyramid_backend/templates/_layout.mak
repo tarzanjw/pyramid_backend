@@ -24,7 +24,6 @@ td.datatype-datetime {text-align: right}
 </%block>
 
 <%def name="cmd_button(cmd)">
-<% print cmd %>
 <a href="${cmd['url']}"
     title="${cmd['label']}"
     % if 'onclick' in cmd and cmd['onclick']:

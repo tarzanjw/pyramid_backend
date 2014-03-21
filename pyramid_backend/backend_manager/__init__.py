@@ -62,7 +62,7 @@ class Manager(object):
             'renderer': 'pyramid_backend:templates/list.mak',
             'permission': 'list',
             '_icon': 'list',
-            '_label': self.display_name + ' list',
+            '_label': self.display_name + u' list',
         },
         'create': {
             'route_name': 'admin_site',
@@ -72,7 +72,7 @@ class Manager(object):
             'renderer': 'pyramid_backend:templates/create.mak',
             'permission': 'create',
             '_icon': 'plus',
-            '_label': 'Create new ' + self.display_name,
+            '_label': u'Create new ' + self.display_name,
         },
         'detail': {
             'route_name': 'admin_site',
@@ -81,7 +81,7 @@ class Manager(object):
             'renderer': 'pyramid_backend:templates/detail.mak',
             'permission': 'detail',
             '_icon': 'eye-open',
-            '_label': 'View %s detail',
+            '_label': u'View %s detail',
         },
         'update': {
             'route_name': 'admin_site',
@@ -91,7 +91,7 @@ class Manager(object):
             'renderer': 'pyramid_backend:templates/update.mak',
             'permission': 'update',
             '_icon': 'pencil',
-            '_label': 'Update %s',
+            '_label': u'Update %s',
         },
         'delete': {
             'route_name': 'admin_site',
@@ -101,8 +101,8 @@ class Manager(object):
             'renderer': 'pyramid_backend:templates/update.mak',
             'permission': 'delete',
             '_icon': 'remove',
-            '_label': 'Delete %s',
-            '_onclick': "return confirm('Do you want to delete &quot;%s&quot;?')",
+            '_label': u'Delete %s',
+            '_onclick': u"alert('%s');"
         },
     }
 
@@ -128,7 +128,7 @@ class Manager(object):
 
     __default_schema_cls__ = None
     __default_id_attr__ = 'id'
-    __default_list__items_per_page__ = 2
+    __default_list__items_per_page__ = 50
 
     @property
     def __default_slug__(self):
@@ -177,9 +177,6 @@ class Manager(object):
         raise NotImplementedError()
 
     def update(self, obj, data):
-        raise NotImplementedError()
-
-    def delete(self, obj):
         raise NotImplementedError()
 
     def fetch_objects(self, filters, page=1):
