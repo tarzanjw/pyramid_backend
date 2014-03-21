@@ -36,7 +36,6 @@ class ModelView(object):
         return self.model.__backend_manager__
 
     def cell_datatype(self, val):
-        print val, type(val)
         if val is None:
             return 'none'
         if isinstance(val, bool):
@@ -172,7 +171,6 @@ class ModelView(object):
                            buttons=(deform.Button(title='Update'),
                                     deform.Button(title='Cancel', type='reset', name='cancel')))
 
-        print self.request.POST
         if 'submit' in self.request.POST:
             try:
                 data = form.validate(self.request.POST.items())
