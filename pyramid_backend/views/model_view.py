@@ -136,7 +136,7 @@ class ModelView(object):
         }
 
     def action_create(self):
-        schema = self.backend_mgr.schema_cls()
+        schema = self.backend_mgr.schema_cls().bind()
         form = deform.Form(schema,
                            buttons=(deform.Button(title='Create'),
                                     deform.Button(title='Cancel', type='reset', name='cancel')))
@@ -157,7 +157,7 @@ class ModelView(object):
 
     def action_update(self):
         obj = self.context.object
-        schema = self.backend_mgr.schema_cls()
+        schema = self.backend_mgr.schema_cls().bind(obj=obj)
         appstruct = {c.name:obj.__getattribute__(c.name) for c in schema.children}
         form = deform.Form(schema,
                            appstruct=appstruct,
