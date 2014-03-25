@@ -51,19 +51,19 @@ class SQLAlchemyManager(Manager):
         return [rel.key for rel in self.Model.__mapper__.relationships]
 
     @property
-    def __default_list__column_names_to_display__(self):
+    def __default_list__columns_to_display__(self):
         columns = OrderedDict(zip(self.column_names, [_name_to_words(n) for n in self.column_names]))
         columns[self.id_attr] = '#'
         return columns
 
     @property
-    def __default_detail__column_names_to_display__(self):
+    def __default_detail__columns_to_display__(self):
         columns = OrderedDict(zip(self.column_names, [_name_to_words(n) for n in self.column_names]))
         columns[self.id_attr] = '#'
         return columns
 
     @property
-    def __default_foreign_key_names__(self):
+    def __default_detail__relations_to_display__(self):
         return OrderedDict(zip(self._foreignkey_names, [_name_to_words(n) for n in self._foreignkey_names]))
 
 

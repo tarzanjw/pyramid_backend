@@ -9,7 +9,7 @@
     <thead>
         <tr>
             <th>Commands</th>
-            % for name, label in backend_mgr.list__column_names_to_display.items():
+            % for name, label in backend_mgr.list__columns_to_display.items():
             <th class="">${label}</th>
             % endfor
         </tr>
@@ -22,7 +22,7 @@
                 ${cmd_button(cmd)}
                 % endfor
             </td>
-        % for name in backend_mgr.list__column_names_to_display:
+        % for name in backend_mgr.list__columns_to_display:
             <%
                 val = e.__getattribute__(name)
                 val_type = view.cell_datatype(val)

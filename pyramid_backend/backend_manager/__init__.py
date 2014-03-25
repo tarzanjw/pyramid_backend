@@ -45,6 +45,28 @@ def get_manager(model):
         model.__backend_manager__ = manager
         return manager
 
+class AttrDisplayConf(object):
+    def __init__(self, attr_name, *args):
+        self.attr_name = attr_name
+        def first_instance(types, default):
+            for arg in args:
+                if isinstance(arg, types):
+                    return arg
+            return default
+        self.label = first_instance(basestring, _name_to_words(attr_name))
+        self.limit = first_instance((int, long), 5)
+
+    def values(self, obj):
+        vals = self.value(obj)
+        if isinstance(vals, (list, tuple)):
+            vals = vals[:self.limit]
+        else:
+            vals = [vals,]
+        return vals
+
+    def value(self, obj):
+        return obj.__getattribute__(self.attr_name)
+
 class Manager(object):
     def __init__(self, model):
         """
@@ -113,11 +135,22 @@ class Manager(object):
         'display_name',
         'schema_cls',
         'id_attr',
-        'list__column_names_to_display',
-        'detail__column_names_to_display',
+        'list__columns_to_display',
+        'detail__columns_to_display',
         'list__items_per_page',
-        'foreign_key_names',
+        'detail__relations_to_display',
     ]
+
+    _display_config = [
+        'list__columns_to_display',
+        'detail__columns_to_display',
+        'detail__relations_to_display',
+    ]
+
+    def _make_attr_display_config(self, conf):
+        if not isinstance(conf, (list, tuple)):
+            conf = [conf,]
+        return AttrDisplayConf(*conf)
 
     def __getattribute__(self, name):
         if name in Manager._configurable_properties:
@@ -125,6 +158,8 @@ class Manager(object):
                 val = getattr(self.Model, '__backend_' + name + '__')
             except AttributeError:
                 val = getattr(self, '__default_' + name + '__')
+            if name in Manager._display_config:
+                val = [self._make_attr_display_config(v) for v in val]
             setattr(self, name, val)
             return val
         return super(Manager, self).__getattribute__(name)
@@ -137,25 +172,24 @@ class Manager(object):
     def __default_slug__(self):
         return _name_to_underscore(self.Model.__name__)
 
-
     @property
     def __default_display_name__(self):
         return _name_to_words(self.Model.__name__)
 
     @property
-    def __default_list__column_names_to_display__(self):
+    def __default_list__columns_to_display__(self):
         columns = dict(zip(dir(self.Model), dir(self.Model)))
         columns[self.id_attr] = '#'
         return columns
 
     @property
-    def __default_detail__column_names_to_display__(self):
+    def __default_detail__columns_to_display__(self):
         columns = dict(zip(dir(self.Model), dir(self.Model)))
         columns[self.id_attr] = '#'
         return columns
 
     @property
-    def __default_foreign_key_names__(self):
+    def __default_detail__relations_to_display__(self):
         return {}
 
     @reify

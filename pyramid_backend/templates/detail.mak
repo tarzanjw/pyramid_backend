@@ -18,37 +18,41 @@
 <%block name="page_title">${backend_mgr.display_name}#${obj} detail</%block>
 
 <%block name="object_detail">
-% for attr_name, label in backend_mgr.detail__column_names_to_display.items():
+% for adc in backend_mgr.detail__columns_to_display:
 <%
-    val = obj.__getattribute__(attr_name)
+    val = adc.value(obj)
     val_type = view.cell_datatype(val)
 %>
 <div class="object-detail">
     <div class="row col-type-general">
-        <div class="col-lg-3 name">${label}</div>
+        <div class="col-lg-3 name">${adc.label}</div>
         <div class="col-lg-9 value datatype-${val_type}">${data_cell(val)}</div>
     </div>
 </div>
 % endfor
 </%block>
-% if backend_mgr.foreign_key_names:
-<legend>Foreign keys</legend>
+<legend>Relations</legend>
 <div class="object-foreign-keys">
-% for fk_attr, fk_label in backend_mgr.foreign_key_names.items():
-<% val = obj.__getattribute__(fk_attr) %>
+% for adc in backend_mgr.detail__relations_to_display:
+<% vals = adc.values(obj) %>
 <div class="row col-type-general">
-    <div class="col-lg-3 name">${fk_label}</div>
+    <div class="col-lg-3 name">${adc.label}</div>
     <div class="col-lg-9 value">
-        % if val:
-            <a href="${_rsr.object_url(request, val)}">${data_cell(val)}</a>
-        % else:
-            ${data_cell(val)}
-        % endif:
+        <ul class="list-unstyled">
+        % for val in vals:
+            <li>
+            % if val:
+                <a href="${_rsr.object_url(request, val)}">${data_cell(val)}</a>
+            % else:
+                ${data_cell(val)}
+            % endif:
+            </li>
+        % endfor
+        </ul>
     </div>
 </div>
 % endfor
 </div>
-% endif
 ##
 ##% if view.relations:
 ##<legend>Relations</legend>
