@@ -7,6 +7,7 @@ from webhelpers.paginate import Page
 from pyramid.httpexceptions import HTTPFound
 from . import cell_datatype
 from .. import resources as _rsr
+import json
 
 class ModelView(object):
 
@@ -68,7 +69,7 @@ class ModelView(object):
             if issubclass(cxt, _rsr.ObjectResource):
                 _label = ca['_label'] if '_label' in ca else ('%s#' + ca_name)
                 _label = _label % obj
-                _onclick = (ca['_onclick'] % obj) if '_onclick' in ca else None
+                _onclick = json.dumps(ca['_onclick'] % obj).strip('"\'') if '_onclick' in ca else None
                 actions.append({
                     'url': _rsr.object_url(self.request, obj, ca.get('name', None)),
                     'label': _label,

@@ -170,6 +170,11 @@ class Manager(object):
 
     def configure_actions(self, actions):
         if actions is None:
+            try:
+                actions = self.Model.__backend_default_actions__
+            except AttributeError:
+                pass
+        if actions is None:
             actions = self.default_actions
         elif isinstance(actions, (list, tuple,)):
             actions = {k:v for k,v in self.default_actions.items() if k in actions}
