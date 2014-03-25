@@ -39,7 +39,11 @@
 <div class="row col-type-general">
     <div class="col-lg-3 name">${fk_label}</div>
     <div class="col-lg-9 value">
-        <a href="${_rsr.object_url(request, val)}">${data_cell(val)}</a>
+        % if val:
+            <a href="${_rsr.object_url(request, val)}">${data_cell(val)}</a>
+        % else:
+            ${data_cell(val)}
+        % endif:
     </div>
 </div>
 % endfor
