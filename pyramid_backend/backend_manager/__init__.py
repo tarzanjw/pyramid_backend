@@ -116,6 +116,7 @@ class Manager(object):
         'list__column_names_to_display',
         'detail__column_names_to_display',
         'list__items_per_page',
+        'foreign_key_names',
     ]
 
     def __getattribute__(self, name):
@@ -152,6 +153,10 @@ class Manager(object):
         columns = dict(zip(dir(self.Model), dir(self.Model)))
         columns[self.id_attr] = '#'
         return columns
+
+    @property
+    def __default_foreign_key_names__(self):
+        return {}
 
     @reify
     def ModelResource(self):

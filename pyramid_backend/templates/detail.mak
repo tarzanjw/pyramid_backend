@@ -1,4 +1,7 @@
-<%! import markupsafe %>
+<%!
+    import markupsafe
+    from pyramid_backend import resources as _rsr
+%>
 <%inherit file="_layout.mak" />
 <%namespace file="_layout.mak" import="data_cell" />
 
@@ -27,53 +30,21 @@
     </div>
 </div>
 % endfor
-##% if 'delete' in view.actions:
-##<div row col-type-general>
-##    <div class="col-lg-9 col-lg-offset-3">
-##        <a class="btn btn-sm btn-danger" id="btnDelete"
-##           data-message="Do you want to delete ${view.Resource.__name__}#${request.context.__name__}"
-##           href="${request.resource_url(request.context, 'delete')}">
-##            Delete</a>
-##    </div>
-##</div>
-##<script type="text/javascript">
-##jQuery(function($) {
-##    $('#btnDelete').click(function(e) {
-##        if (confirm($(this).attr('data-message')))
-##            return true;
-##        else {
-##            e.preventDefault();
-##            return false;
-##        }
-##    })
-##})
-##</script>
-##% endif
 </%block>
-##
-##<%
-##    _ = request.root
-##%>
-##
-##% if view.foreign_keys:
-##<legend>Foreign keys</legend>
-##<div class="object-foreign-keys">
-##% for fk in view.foreign_keys:
-##% if cur_obj.__getattribute__(fk):
-##<%
-##    fk_obj = cur_obj.__getattribute__(fk)
-##    fk_name = fk
-##%>
-##<div class="row col-type-general">
-##    <div class="col-lg-3 name">${' '.join([word.capitalize() for word in fk_name.split('_')])}</div>
-##    <div class="col-lg-9 value">
-##        <a href="${object_url(fk_obj)}">${fk_obj}</a>
-##    </div>
-##</div>
-##% endif
-##% endfor
-##</div>
-##% endif
+% if backend_mgr.foreign_key_names:
+<legend>Foreign keys</legend>
+<div class="object-foreign-keys">
+% for fk_attr, fk_label in backend_mgr.foreign_key_names.items():
+<% val = obj.__getattribute__(fk_attr) %>
+<div class="row col-type-general">
+    <div class="col-lg-3 name">${fk_label}</div>
+    <div class="col-lg-9 value">
+        <a href="${_rsr.object_url(request, val)}">${data_cell(val)}</a>
+    </div>
+</div>
+% endfor
+</div>
+% endif
 ##
 ##% if view.relations:
 ##<legend>Relations</legend>
