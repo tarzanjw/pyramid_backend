@@ -129,7 +129,8 @@ class ModelView(object):
                     )
         return {
             'view': self,
-            'columns': self.backend_mgr.list__column_names_to_display,
+            'backend_mgr': self.backend_mgr,
+            # 'columns': self.backend_mgr.list__column_names_to_display,
             'page': page,
         }
 

@@ -1,14 +1,15 @@
+<%! from pyramid_backend import resources as _rsr %>
 <%inherit file="_layout.mak"/>
 <%namespace file="_layout.mak" import="cmd_button, data_cell"/>
 
-<%block name="page_title">${request.context.model.__backend_manager__.display_name} list</%block>
+<%block name="page_title">${backend_mgr.display_name} list</%block>
 
 <%block name="object_list">
 <table class="table table-striped table-bordered table-condensed table-objects">
     <thead>
         <tr>
             <th>Commands</th>
-            % for name, label in columns.items():
+            % for name, label in backend_mgr.list__column_names_to_display.items():
             <th class="">${label}</th>
             % endfor
         </tr>
@@ -21,12 +22,16 @@
                 ${cmd_button(cmd)}
                 % endfor
             </td>
-        % for name in columns:
+        % for name in backend_mgr.list__column_names_to_display:
             <%
                 val = e.__getattribute__(name)
                 val_type = view.cell_datatype(val)
             %>
+            % if name == backend_mgr.id_attr:
+                <td class="datatype-${val_type}"><a href="${_rsr.object_url(request, e)}">${val}</a></td>
+            % else:
             <td class="datatype-${val_type}">${data_cell(val)}</td>
+            % endif
         % endfor
         </tr>
     % endfor
