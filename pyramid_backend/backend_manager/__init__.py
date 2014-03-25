@@ -104,7 +104,7 @@ class Manager(object):
             'permission': 'delete',
             '_icon': 'remove',
             '_label': u'Delete %s',
-            '_onclick': u"alert('%s');"
+            '_onclick': u"return confirm('Do you want to delete %s?');"
         },
     }
 
