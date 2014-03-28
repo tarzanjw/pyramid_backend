@@ -8,6 +8,13 @@ from pyramid.httpexceptions import HTTPFound
 from . import cell_datatype
 from .. import resources as _rsr
 import json
+import colander
+
+def _none_to_colander_null(data):
+    return {k:v if v is not None else colander.null for k,v in data.items()}
+
+def _colander_null_to_none(data):
+    return {k:v if v is not colander.null else None for k,v in data.items()}
 
 class ModelView(object):
 
@@ -36,6 +43,10 @@ class ModelView(object):
         :rtype : pyramid_backend.backend_manager.Manager
         """
         return self.model.__backend_manager__
+
+    @property
+    def model_schema_cls(self):
+        return self.backend_mgr.schema_cls
 
     def cell_datatype(self, val):
         return cell_datatype(val)
@@ -92,31 +103,6 @@ class ModelView(object):
 
     def action_list(self):
         cur_page = int(self.request.params.get("_page", 1))
-        # objs = self.DBSession.query(self.Object)
-        # attr_names = self.obj_attr_names
-        #
-        # for name, value in self.request.params.mixed().iteritems():
-        #     if name in attr_names:
-        #         objs = objs.filter(getattr(self.Object, name).like("%%%s%%" % value))
-        #
-        # from sqlalchemy import func
-        # objs = objs.order_by(self.Object.id.desc())
-        # item_count = self.DBSession.query(func.count(self.Object.id))
-        # for name, value in self.request.params.mixed().iteritems():
-        #     if name in attr_names:
-        #         item_count = item_count.filter(getattr(self.Object, name).like("%%%s%%" % value))
-        # item_count = item_count.scalar()
-        #
-        # page = Page(objs, page=cur_page,
-        #             item_count=item_count,
-        #             items_per_page=self.list__items_per_page,
-        #             url=PageURL_WebOb(self.request)
-        #             )
-        #
-        # return {
-        #     "page": page,
-        #     "view": self,
-        # }
         filters = {k:v for k,v in self.request.GET.items() if not k.startswith('_')}
         objects = self.backend_mgr.fetch_objects(page=cur_page, filters=filters)
         objects = list(objects)
@@ -136,7 +122,7 @@ class ModelView(object):
         }
 
     def action_create(self):
-        schema = self.backend_mgr.schema_cls().bind()
+        schema = self.model_schema_cls().bind()
         form = deform.Form(schema,
                            buttons=(deform.Button(title='Create'),
                                     deform.Button(title='Cancel', type='reset', name='cancel')))
@@ -144,6 +130,7 @@ class ModelView(object):
         if 'submit' in self.request.POST:
             try:
                 data = form.validate(self.request.POST.items())
+                data = _colander_null_to_none(data)
                 obj = self.backend_mgr.create(data)
                 self.request.session.flash(u'"%s" was created successful.' % obj, queue='pbackend')
                 return HTTPFound(_rsr.object_url(self.request, obj))
@@ -157,8 +144,9 @@ class ModelView(object):
 
     def action_update(self):
         obj = self.context.object
-        schema = self.backend_mgr.schema_cls().bind(obj=obj)
-        appstruct = {c.name:obj.__getattribute__(c.name) for c in schema.children}
+        schema = self.model_schema_cls().bind(obj=obj)
+        """:type : colander.Schema"""
+        appstruct = _none_to_colander_null(obj.__dict__)
         form = deform.Form(schema,
                            appstruct=appstruct,
                            buttons=(deform.Button(title='Update'),
@@ -167,6 +155,7 @@ class ModelView(object):
         if 'submit' in self.request.POST:
             try:
                 data = form.validate(self.request.POST.items())
+                data = _colander_null_to_none(data)
                 obj = self.backend_mgr.update(obj, data)
                 self.request.session.flash(u'"%s" was updated successful.' % obj, queue='pbackend')
                 return HTTPFound(_rsr.object_url(self.request, obj))
