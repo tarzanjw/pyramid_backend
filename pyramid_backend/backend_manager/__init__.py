@@ -1,7 +1,7 @@
 __author__ = 'tarzan'
 import re
 import inspect
-import importlib
+import itertools
 from pyramid.decorator import reify
 
 _managers_factory = []
@@ -58,9 +58,9 @@ class AttrDisplayConf(object):
 
     def values(self, obj):
         vals = self.value(obj)
-        if isinstance(vals, (list, tuple)):
-            vals = vals[:self.limit]
-        else:
+        try:
+            vals = itertools.islice(vals, self.limit)
+        except TypeError:
             vals = [vals,]
         return vals
 

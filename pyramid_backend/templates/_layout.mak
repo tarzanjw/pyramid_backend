@@ -46,7 +46,7 @@ if val_type == 'longtext':
 elif val_type == 'none':
     val = '<code>' + val + '</code>'
 elif val_type == 'bool':
-    val = '<span class="label label-success">True</span>' if val else \
+    val = '<span class="label label-success">True</span>' if raw_val else \
         '<span class="label label-default">False</span>'
 elif model_hepler.is_registered_model(raw_val):
     val = '<a href="%s">%s</a>' % (_rsr.object_url(request, raw_val), val)
