@@ -15,6 +15,7 @@
 td.datatype-number {text-align: right}
 td.datatype-datetime {text-align: right}
 .datatype-bool {font-weight: bold; font-style: italic}
+.deform input, .deform textarea, .deform select {font-family: monospace}
 </style>
 
 <%block name="flashes_block">
