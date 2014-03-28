@@ -9,8 +9,8 @@
     <thead>
         <tr>
             <th>Commands</th>
-            % for name, label in backend_mgr.list__columns_to_display.items():
-            <th class="">${label}</th>
+            % for adc in backend_mgr.list__columns_to_display:
+            <th class="">${adc.label}</th>
             % endfor
         </tr>
     </thead>
@@ -22,12 +22,12 @@
                 ${cmd_button(cmd)}
                 % endfor
             </td>
-        % for name in backend_mgr.list__columns_to_display:
+        % for adc in backend_mgr.list__columns_to_display:
             <%
-                val = e.__getattribute__(name)
+                val = adc.value(e)
                 val_type = view.cell_datatype(val)
             %>
-            % if name == backend_mgr.id_attr:
+            % if adc.attr_name == backend_mgr.id_attr:
                 <td class="datatype-${val_type}"><a href="${_rsr.object_url(request, e)}">${val}</a></td>
             % else:
             <td class="datatype-${val_type}">${data_cell(val)}</td>
