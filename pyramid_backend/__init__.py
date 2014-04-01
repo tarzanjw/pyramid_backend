@@ -38,9 +38,14 @@ def includeme(config):
     model_paths = settings.get('pyramid_backend.models', '')
     model_paths = filter(bool, re.split('\s+', model_paths))
     for path in model_paths:
+        if '#' in path:
+            path, actions = path.split('#', 1)
+            actions = re.split(r'[\s,]+', actions.strip())
+        else:
+            actions = None
         _module, _var = path.rsplit('.', 1)
         _module = importlib.import_module(_module, package=None)
         model = getattr(_module, _var)
-        config.add_model_view(model)
+        config.add_model_view(model, actions=actions)
 
     config.scan(__name__)
