@@ -73,14 +73,15 @@ class ObjectResource(object):
         """
         self.__parent__ = parent
         self.__name__ = name
+        self.model = parent.model
         self.request = parent.request
         self.object = object
 
     def __resource_url__(self, *args, **kwargs):
-        return object_url(self.__model__, self.__name__)
+        return object_url(self.model, self.__name__)
 
     def __str__(self):
-        return self.__model__.__name__ + '#' + self.__name__
+        return self.model.__name__ + '#' + self.__name__
 
 _AUTO_CLASSES = {}
 
@@ -97,6 +98,7 @@ def model_resource_class(model):
         pass
 
     return _AUTO_CLASSES[cls_name]
+
 
 def object_resource_class(model):
     cls_name = model.__name__ + '_ObjectResource'

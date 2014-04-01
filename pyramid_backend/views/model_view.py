@@ -1,7 +1,7 @@
 __author__ = 'tarzan'
 
 import urllib
-from datetime import datetime
+import inspect
 import deform
 from webhelpers.paginate import Page
 from pyramid.httpexceptions import HTTPFound
@@ -49,6 +49,9 @@ class ModelView(object):
 
     @property
     def model_schema_cls(self):
+        assert inspect.isclass(self.backend_mgr.schema_cls), \
+            '%s.__backend_schema_cls__ (%s) is not a class' % \
+            (self.model.__name__, self.backend_mgr.schema_cls)
         return self.backend_mgr.schema_cls
 
     def cell_datatype(self, val):

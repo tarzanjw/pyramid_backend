@@ -203,18 +203,20 @@ class Manager(object):
         return resources.object_resource_class(self.Model)
 
     def configure_actions(self, actions):
-        if actions is None:
-            try:
-                actions = self.Model.__backend_default_actions__
-            except AttributeError:
-                pass
-        if actions is None:
+        self.actions = {}
+        if not actions or not isinstance(actions, (list, tuple)):
             actions = self.default_actions
-        elif isinstance(actions, (list, tuple,)):
-            actions = {k:v for k,v in self.default_actions.items() if k in actions}
-        elif isinstance(actions, dict):
-            actions = {k:(v if k not in actions else v if v else actions[k]) for k,v in actions}
-        self.actions = actions
+        for a in actions:
+            self.add_action(a)
+
+    def add_action(self, action_conf):
+        assert bool(action_conf), 'Can not be empty configuration'
+        if not isinstance(action_conf, (list, tuple,)):
+            assert action_conf in self.default_actions, 'Unknown action named "%s"' % action_conf
+            action_conf = (action_conf, self.default_actions[action_conf])
+        aname, aconf = action_conf
+        self.actions[aname] = aconf
+        return aconf
 
     def object_id(self, obj):
         return getattr(obj, self.id_attr)
