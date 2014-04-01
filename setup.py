@@ -7,6 +7,7 @@ README = open(os.path.join(here, 'README.md')).read()
 
 requires = [
     'pyramid >= 1.5a1',
+    'deform',
     'pyramid_layout',
     'webhelpers',
     ]
