@@ -10,11 +10,14 @@ from .. import resources as _rsr
 import json
 import colander
 
+
 def _none_to_colander_null(data):
     return {k:v if v is not None else colander.null for k,v in data.items()}
 
+
 def _colander_null_to_none(data):
     return {k:v if v is not colander.null else None for k,v in data.items()}
+
 
 class ModelView(object):
 
@@ -145,7 +148,7 @@ class ModelView(object):
     def action_update(self):
         obj = self.context.object
         schema = self.model_schema_cls().bind(obj=obj)
-        """:type : colander.Schema"""
+        """:type schema: colander.Schema"""
         appstruct = _none_to_colander_null(obj.__dict__)
         form = deform.Form(schema,
                            appstruct=appstruct,
