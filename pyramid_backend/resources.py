@@ -2,7 +2,7 @@ __author__ = 'tarzan'
 
 import urllib
 from . import model as model_helper
-from . import ADMIN_SITE_PATH
+import pyramid_backend as pb
 
 def model_url(request, model, action=None, query=None):
     """
@@ -14,7 +14,7 @@ def model_url(request, model, action=None, query=None):
     """
     model = model_helper.get_registered_model(model)
 
-    url = ADMIN_SITE_PATH + model.__backend_manager__.slug
+    url = pb.ADMIN_SITE_PATH + model.__backend_manager__.slug
     if action:
         url += '/' + action
     if query and isinstance(query, dict):
@@ -31,7 +31,7 @@ def object_url(request, obj, action=None, query=None, id=None):
     else:
         model = obj.__class__
     id = model.__backend_manager__.object_id(obj)
-    url = ADMIN_SITE_PATH + model.__backend_manager__.slug + '/' + str(id)
+    url = pb.ADMIN_SITE_PATH + model.__backend_manager__.slug + '/' + str(id)
     if action:
         url += '/' + action
     if query and isinstance(query, dict):
@@ -114,7 +114,6 @@ from pyramid.security import Allow, Everyone, ALL_PERMISSIONS
 
 class AdminSite(object):
     __acl__ = [
-        (Allow, Everyone, ALL_PERMISSIONS),
     ]
     model_mappings = {
 

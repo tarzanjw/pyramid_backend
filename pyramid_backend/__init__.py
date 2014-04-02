@@ -22,6 +22,8 @@ def includeme(config):
     route_pattern = ADMIN_SITE_PATH + '*traverse'
     config.add_route('admin_site', route_pattern, factory=_rsr.AdminSite)
     config.add_directive('add_model_view', views.add_model_view)
+    config.add_directive('add_model_action', views.add_model_action)
+    config.add_directive('add_object_action', views.add_object_action)
 
     factories_path = settings.get('pyramid_backend.manager_factories', """
     pyramid_backend.backend_manager.sqlalchemy.factory
