@@ -13,7 +13,7 @@ requires = [
     ]
 
 setup(name='pyramid_backend',
-      version='0.0',
+      version='1.0',
       description='pyramid_backend',
       long_description=README,
       classifiers=[
@@ -22,8 +22,8 @@ setup(name='pyramid_backend',
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
         ],
-      author='',
-      author_email='',
+      author='Hoc .T Do',
+      author_email='hoc3010@gmail.com',
       url='',
       keywords='web wsgi bfg pylons pyramid',
       packages=find_packages(),

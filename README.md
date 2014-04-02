@@ -1,7 +1,7 @@
 pyramid_backend
 ===============
 
-A backend development kit for pyramid
+A backend development kit for pyramid, feel free to email me *hoc3010 at gmail dot com* about this package.
 
 Usage
 -----
@@ -49,3 +49,11 @@ order is not important
 #### @model_view_config, add_model_view
 #### @model_action_config, add_model_action
 #### @object_action_config, add_object_action
+
+
+CHANGE LOG
+----------
+
+### Version 1.0
+
+* Initialize
