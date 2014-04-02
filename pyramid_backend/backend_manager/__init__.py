@@ -2,6 +2,7 @@ __author__ = 'tarzan'
 import re
 import inspect
 import itertools
+from collections import OrderedDict
 from pyramid.decorator import reify
 
 _managers_factory = []
@@ -74,61 +75,64 @@ class Manager(object):
         """
         assert inspect.isclass(model)
         self.Model = model
-        self.actions = {}
+        self.actions = OrderedDict()
 
     @reify
     def default_actions(self):
-        return {
-        'list': {
-            'route_name': 'admin_site',
-            'context': self.ModelResource,
-            'attr': 'action_list',
-            'renderer': 'pyramid_backend:templates/list.mak',
-            'permission': 'list',
-            '_icon': 'list',
-            '_label': self.display_name + u' list',
-        },
-        'create': {
-            'route_name': 'admin_site',
-            'context': self.ModelResource,
-            'name': 'create',
-            'attr': 'action_create',
-            'renderer': 'pyramid_backend:templates/create.mak',
-            'permission': 'create',
-            '_icon': 'plus',
-            '_label': u'Create new ' + self.display_name,
-        },
-        'detail': {
-            'route_name': 'admin_site',
-            'context': self.ObjectResource,
-            'attr': 'action_detail',
-            'renderer': 'pyramid_backend:templates/detail.mak',
-            'permission': 'detail',
-            '_icon': 'eye-open',
-            '_label': u'View %s detail',
-        },
-        'update': {
-            'route_name': 'admin_site',
-            'context': self.ObjectResource,
-            'name': 'update',
-            'attr': 'action_update',
-            'renderer': 'pyramid_backend:templates/update.mak',
-            'permission': 'update',
-            '_icon': 'pencil',
-            '_label': u'Update %s',
-        },
-        'delete': {
-            'route_name': 'admin_site',
-            'context': self.ObjectResource,
-            'name': 'delete',
-            'attr': 'action_delete',
-            'renderer': 'pyramid_backend:templates/update.mak',
-            'permission': 'delete',
-            '_icon': 'remove',
-            '_label': u'Delete %s',
-            '_onclick': u"return confirm('Do you want to delete %s?');"
-        },
-    }
+        return OrderedDict([
+            ('list', {
+                'route_name': 'admin_site',
+                'context': self.ModelResource,
+                'name': '',
+                'attr': 'action_list',
+                'renderer': 'pyramid_backend:templates/list.mak',
+                'permission': 'list',
+                '_icon': 'list',
+                '_label': self.display_name + u' list',
+            }),
+            ('create', {
+                'route_name': 'admin_site',
+                'context': self.ModelResource,
+                'name': 'create',
+                'attr': 'action_create',
+                'renderer': 'pyramid_backend:templates/create.mak',
+                'permission': 'create',
+                '_icon': 'plus',
+                '_label': u'Create new ' + self.display_name,
+            }),
+            ('detail', {
+                'route_name': 'admin_site',
+                'context': self.ObjectResource,
+                'name': '',
+                'attr': 'action_detail',
+                'renderer': 'pyramid_backend:templates/detail.mak',
+                'permission': 'detail',
+                '_icon': 'eye-open',
+                '_label': u'View %s detail',
+            }),
+            ('update', {
+                'route_name': 'admin_site',
+                'context': self.ObjectResource,
+                'name': 'update',
+                'attr': 'action_update',
+                'renderer': 'pyramid_backend:templates/update.mak',
+                'permission': 'update',
+                '_icon': 'pencil',
+                '_label': u'Update %s',
+            }),
+            ('delete', {
+                'route_name': 'admin_site',
+                'context': self.ObjectResource,
+                'name': 'delete',
+                'attr': 'action_delete',
+                'renderer': 'pyramid_backend:templates/update.mak',
+                'permission': 'delete',
+                '_icon': 'remove',
+                '_label': u'Delete %s',
+                '_onclick': u"return confirm('Do you want to delete %s?');",
+            }),
+        ]
+        )
 
     _configurable_properties = [
         'slug',
@@ -202,21 +206,17 @@ class Manager(object):
         from pyramid_backend import resources
         return resources.object_resource_class(self.Model)
 
-    def configure_actions(self, actions):
-        self.actions = {}
-        if not actions or not isinstance(actions, (list, tuple)):
-            actions = self.default_actions
-        for a in actions:
-            self.add_action(a)
-
-    def add_action(self, action_conf):
+    def normalize_action(self, action_conf):
         assert bool(action_conf), 'Can not be empty configuration'
         if not isinstance(action_conf, (list, tuple,)):
             assert action_conf in self.default_actions, 'Unknown action named "%s"' % action_conf
             action_conf = (action_conf, self.default_actions[action_conf])
-        aname, aconf = action_conf
-        self.actions[aname] = aconf
-        return aconf
+        return action_conf
+
+    def add_action(self, action_conf):
+        action_name, action_conf = self.normalize_action(action_conf)
+        self.actions[action_name] = action_conf
+        return action_name, action_conf
 
     def object_id(self, obj):
         return getattr(obj, self.id_attr)

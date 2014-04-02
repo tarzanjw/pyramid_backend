@@ -71,7 +71,7 @@ class ModelView(object):
         for ca_name, ca in configured_actions.items():
             cxt = ca['context']
             if issubclass(cxt, _rsr.ModelResource):
-                _label = ca['_label'] if '_label' in ca else (self.backend_mgr.display_name + '#' + ca_name)
+                _label = ca['_label'] if '_label' in ca else (self.backend_mgr.display_name + '@' + ca_name)
                 actions.append({
                     'url': _rsr.model_url(self.request, self.model, ca.get('name', None)),
                     'label': _label,
@@ -84,7 +84,7 @@ class ModelView(object):
         for ca_name, ca in self.backend_mgr.actions.items():
             cxt = ca['context']
             if issubclass(cxt, _rsr.ObjectResource):
-                _label = ca['_label'] if '_label' in ca else ('%s#' + ca_name)
+                _label = ca['_label'] if '_label' in ca else ('%s@' + ca_name)
                 _label = _label % obj
                 _onclick = json.dumps(ca['_onclick'] % obj).strip('"\'') if '_onclick' in ca else None
                 actions.append({

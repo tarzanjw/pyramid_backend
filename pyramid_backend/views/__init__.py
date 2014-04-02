@@ -7,11 +7,11 @@ from pyramid_backend import resources as _rsr
 from pyramid_backend import model as model_helper
 import venusian
 
+
 @view_config(route_name='admin_site', context=_rsr.AdminSite,
              renderer='pyramid_backend:templates/index.mak')
-def admin_site_home_view(context, request):
+def admin_site_home_view(request):
     """
-    :type context: pyramid_backend.resources.AdminSite
     :type request: pyramid.request.Request
     """
     models = model_helper.get_registered_models()
@@ -53,34 +53,40 @@ def add_model_view(config, model, view_cls=None, actions=None):
         view_cls = ModelView
     mgr = model.__backend_manager__
     """:type : pyramid_backend.backend_manager.Manager"""
-    mgr.configure_actions(actions)
-    for aname, aconf in mgr.actions.items():
-        config.add_view(view=view_cls, **{k:v for k,v in aconf.items() if not k.startswith('_')})
+    if actions is None:
+        actions = mgr.default_actions
+    for action_conf in actions:
+        action_name, action_conf = mgr.normalize_action(action_conf)
+        if 'view' not in action_conf:
+            action_conf['view'] = view_cls
+        _add_action_view(config, model, action_name, **action_conf)
+
+
+def _add_action_view(config, model, action_name, default_context=None, **kwargs):
+    model_helper.register_model(model)
+    mgr = model.__backend_manager__
+    """:type : pyramid_backend.backend_manager.Manager"""
+    if 'context' not in kwargs:
+        kwargs['context'] = default_context
+    if 'route_name' not in kwargs:
+        kwargs['route_name'] = 'admin_site'
+    action_name, action_conf = mgr.add_action((action_name, kwargs))
+    view_conf = {k: v for k, v in action_conf.items() if not k.startswith('_')}
+    if 'name' not in view_conf:
+        view_conf['name'] = action_name
+    config.add_view(**view_conf)
 
 
 def add_model_action(config, model, action_name, **kwargs):
     model_helper.register_model(model)
     mgr = model.__backend_manager__
-    """:type : pyramid_backend.backend_manager.Manager"""
-    if 'context' not in kwargs:
-        kwargs['context'] = mgr.ModelResource
-    if 'route_name' not in kwargs:
-        kwargs['route_name'] = 'admin_site'
-    aconf = mgr.add_action((action_name, kwargs))
-    config.add_view(name=action_name, **{k:v for k,v in aconf.items() if not k.startswith('_')})
+    _add_action_view(config, model, action_name, mgr.ModelResource, **kwargs)
 
 
 def add_object_action(config, model, action_name, **kwargs):
     model_helper.register_model(model)
     mgr = model.__backend_manager__
-    """:type : pyramid_backend.backend_manager.Manager"""
-    if 'context' not in kwargs:
-        kwargs['context'] = mgr.ObjectResource
-    if 'route_name' not in kwargs:
-        kwargs['route_name'] = 'admin_site'
-    aconf = mgr.add_action((action_name, kwargs))
-    view_conf = {k:v for k,v in aconf.items() if not k.startswith('_')}
-    view_conf['name'] = action_name
+    _add_action_view(config, model, action_name, mgr.ObjectResource, **kwargs)
 
 
 class model_view_config(object):
@@ -89,20 +95,22 @@ class model_view_config(object):
         self.model = model
         self.actions = actions
 
-    def view_config(self, scanner, name, wrapped):
+    def view_config(self, scanner, name, ob):
         add_model_view(scanner.config,
-                         self.model,
-                         wrapped,
-                         actions=self.actions)
+                       self.model,
+                       ob,
+                       actions=self.actions)
 
     def __call__(self, wrapped):
-        self.info = venusian.attach(wrapped, self.view_config)
+        assert inspect.isclass(wrapped), \
+            '@model_view_config can decorate to class only (decorated to %s)' % type(wrapped)
+        info = venusian.attach(wrapped, self.view_config)
         return wrapped
 
-class model_action_config(object):
-    pass
 
-class object_action_config(object):
+class _action_view_config(object):
+    _add_action_fn = None
+
     def __init__(self, model, name=None, **kwargs):
         assert model, "You have to specify model"
         self.model = model
@@ -113,7 +121,7 @@ class object_action_config(object):
         def callback(scanner, name, ob):
             conf = self.conf.copy()
             conf['view'] = ob
-            add_object_action(scanner.config,
+            self.__class__._add_action_fn(scanner.config,
                              self.model,
                              self.action_name,
                              **conf)
@@ -127,3 +135,11 @@ class object_action_config(object):
         if self.action_name is None:
             self.action_name = wrapped.__name__
         return wrapped
+
+
+class model_action_config(_action_view_config):
+    _add_action_fn = staticmethod(add_model_action)
+
+
+class object_action_config(_action_view_config):
+    _add_action_fn = staticmethod(add_object_action)
