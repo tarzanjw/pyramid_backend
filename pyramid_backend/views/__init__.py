@@ -70,10 +70,10 @@ def _add_action_view(config, model, action_name, default_context=None, **kwargs)
         kwargs['context'] = default_context
     if 'route_name' not in kwargs:
         kwargs['route_name'] = 'admin_site'
+    if 'name' not in kwargs:
+        kwargs['name'] = action_name
     action_name, action_conf = mgr.add_action((action_name, kwargs))
     view_conf = {k: v for k, v in action_conf.items() if not k.startswith('_')}
-    if 'name' not in view_conf:
-        view_conf['name'] = action_name
     config.add_view(**view_conf)
 
 
