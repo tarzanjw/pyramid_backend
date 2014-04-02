@@ -10,7 +10,8 @@
     padding: 0 0.5em;
     border-bottom: 1px solid #eaf2fb;
 }
-.object-detail .name, .object-foreign-keys .name, .object-relation .name {
+.object-relations .row .value {border-bottom: 1px solid #eaf2fb; margin-bottom: 1em;}
+.object-detail .name, .object-relations .name, .object-relations .name {
     font-weight: bold;
     text-align: right;
 }
@@ -18,21 +19,21 @@
 <%block name="page_title">${backend_mgr.display_name}#${obj} detail</%block>
 
 <%block name="object_detail">
+<div class="object-detail">
 % for adc in backend_mgr.detail__columns_to_display:
 <%
     val = adc.value(obj)
     val_type = view.cell_datatype(val)
 %>
-<div class="object-detail">
     <div class="row col-type-general">
         <div class="col-lg-3 name">${adc.label}</div>
         <div class="col-lg-9 value datatype-${val_type}">${data_cell(val)}</div>
     </div>
-</div>
 % endfor
 </%block>
+</div>
 <legend>Relations</legend>
-<div class="object-foreign-keys">
+<div class="object-relations">
 % for adc in backend_mgr.detail__relations_to_display:
 <% vals = adc.values(obj) %>
 <div class="row col-type-general">
@@ -45,7 +46,7 @@
                 <a href="${_rsr.object_url(request, val)}">${data_cell(val)}</a>
             % else:
                 ${data_cell(val)}
-            % endif:
+            % endif
             </li>
         % endfor
         </ul>
