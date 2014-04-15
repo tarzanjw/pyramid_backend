@@ -7,16 +7,21 @@ from pyramid.decorator import reify
 
 _managers_factory = []
 
+
 def _name_to_underscore(name):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
+
 def _name_to_words(name):
     name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     words = re.split('[_\s]+', name)
+
     def capitalize(s):
         return s[0].upper() + s[1:]
+
     return ' '.join([capitalize(w) for w in words])
+
 
 def create_backend_manager(model):
     """
@@ -30,9 +35,11 @@ def create_backend_manager(model):
 
     raise NotImplementedError('Can not find backend manager for model "%s"' % model.__name__)
 
+
 def register_manager_factory(factory):
     global _managers_factory
     _managers_factory.append(factory)
+
 
 def get_manager(model):
     """
@@ -46,14 +53,17 @@ def get_manager(model):
         model.__backend_manager__ = manager
         return manager
 
+
 class AttrDisplayConf(object):
     def __init__(self, attr_name, *args):
         self.attr_name = attr_name
+
         def first_instance(types, default):
             for arg in args:
                 if isinstance(arg, types):
                     return arg
             return default
+
         self.label = first_instance(basestring, _name_to_words(attr_name))
         self.limit = first_instance((int, long), 5)
 
@@ -62,11 +72,12 @@ class AttrDisplayConf(object):
         try:
             vals = itertools.islice(vals, self.limit)
         except TypeError:
-            vals = [vals,]
+            vals = [vals, ]
         return vals
 
     def value(self, obj):
         return obj.__getattribute__(self.attr_name)
+
 
 class Manager(object):
     def __init__(self, model):
@@ -136,6 +147,7 @@ class Manager(object):
 
     _configurable_properties = [
         'slug',
+        '__acl__',
         'display_name',
         'schema_cls',
         'id_attr',
@@ -153,7 +165,7 @@ class Manager(object):
 
     def _make_attr_display_config(self, conf):
         if not isinstance(conf, (list, tuple)):
-            conf = [conf,]
+            conf = [conf, ]
         return AttrDisplayConf(*conf)
 
     def __getattribute__(self, name):
@@ -199,11 +211,13 @@ class Manager(object):
     @reify
     def ModelResource(self):
         from pyramid_backend import resources
+
         return resources.model_resource_class(self.Model)
 
     @reify
     def ObjectResource(self):
         from pyramid_backend import resources
+
         return resources.object_resource_class(self.Model)
 
     def normalize_action(self, action_conf):

@@ -54,20 +54,6 @@ elif model_hepler.is_registered_model(raw_val):
 ${val|n}
 </%def>
 
-<%block name="page_header">
-<legend>
-    <%block name="page_title">There's no title here</%block>
-    <small>
-      <div class="pull-right">
-      % for cmd in view.toolbar_actions:
-        ${cmd_button(cmd)}
-      % endfor
-      </div>
-    </small>
-</legend>
-</%block>
-
-
 <%block name="breadcrumbs">
 <% entries = view.breadcrumbs %>
 % if len(entries):
@@ -82,6 +68,20 @@ ${val|n}
 </ul>
 % endif
 </%block>
+
+<%block name="page_header">
+<legend>
+    <%block name="page_title">There's no title here</%block>
+    <small>
+      <div class="pull-right">
+      % for cmd in view.toolbar_actions:
+        ${cmd_button(cmd)}
+      % endfor
+      </div>
+    </small>
+</legend>
+</%block>
+
 ${next.body()}
 
 <script type="text/javascript">

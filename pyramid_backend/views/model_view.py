@@ -9,18 +9,18 @@ from . import cell_datatype
 from .. import resources as _rsr
 import json
 import colander
+from pyramid.traversal import lineage
 
 
 def _none_to_colander_null(data):
-    return {k:v if v is not None else colander.null for k,v in data.items()}
+    return {k: v if v is not None else colander.null for k, v in data.items()}
 
 
 def _colander_null_to_none(data):
-    return {k:v if v is not colander.null else None for k,v in data.items()}
+    return {k: v if v is not colander.null else None for k, v in data.items()}
 
 
 class ModelView(object):
-
     def __init__(self, context, request):
         """
         :type context: pyramid_backend.resources.ModelResource
@@ -71,7 +71,8 @@ class ModelView(object):
         for ca_name, ca in configured_actions.items():
             cxt = ca['context']
             if issubclass(cxt, _rsr.ModelResource):
-                _label = ca['_label'] if '_label' in ca else (self.backend_mgr.display_name + '@' + ca_name)
+                _label = ca['_label'] if '_label' in ca else \
+                    (self.backend_mgr.display_name + '@' + ca_name)
                 actions.append({
                     'url': _rsr.model_url(self.request, self.model, ca.get('name', None)),
                     'label': _label,
@@ -86,7 +87,8 @@ class ModelView(object):
             if issubclass(cxt, _rsr.ObjectResource):
                 _label = ca['_label'] if '_label' in ca else ('%s@' + ca_name)
                 _label = _label % obj
-                _onclick = json.dumps(ca['_onclick'] % obj).strip('"\'') if '_onclick' in ca else None
+                _onclick = json.dumps(ca['_onclick'] % obj).strip(
+                    '"\'') if '_onclick' in ca else None
                 actions.append({
                     'url': _rsr.object_url(self.request, obj, ca.get('name', None)),
                     'label': _label,
@@ -97,7 +99,32 @@ class ModelView(object):
 
     @property
     def breadcrumbs(self):
-        return []
+        cxt = self.context
+        cxts = reversed(list(lineage(cxt)))
+        r = self.request
+        if not r.view_name:
+            if self.is_current_context_object:
+                cmd_name = 'detail'
+            else:
+                cmd_name = 'list'
+        else:
+            cmd_name = r.view_name
+
+        if cmd_name in self.backend_mgr.actions:
+            ca = self.backend_mgr.actions[cmd_name]
+            if self.is_current_context_object:
+                _label = ca['_label'] if '_label' in ca else ('%s@' + cmd_name)
+                _label = _label % cxt.object
+            else:
+                _label = ca['_label'] if '_label' in ca else \
+                    (self.backend_mgr.display_name + '@' + cmd_name)
+        else:
+            _label = '@' + cmd_name
+
+        return [{
+            'url': r.resource_url(c),
+            'label': u'%s' % c,
+        } for c in cxts] + [_label, ]
 
     def list_page_url(self, page, partial=False):
         params = self.request.GET.copy()
@@ -109,7 +136,7 @@ class ModelView(object):
 
     def action_list(self):
         cur_page = int(self.request.params.get("_page", 1))
-        filters = {k:v for k,v in self.request.GET.items() if not k.startswith('_')}
+        filters = {k: v for k, v in self.request.GET.items() if not k.startswith('_')}
         objects = self.backend_mgr.fetch_objects(page=cur_page, filters=filters)
         objects = list(objects)
         objects_count = self.backend_mgr.count_objects(filters)
@@ -119,7 +146,7 @@ class ModelView(object):
                     items_per_page=self.backend_mgr.list__items_per_page,
                     url=self.list_page_url,
                     presliced_list=True,
-                    )
+        )
         return {
             'view': self,
             'backend_mgr': self.backend_mgr,
