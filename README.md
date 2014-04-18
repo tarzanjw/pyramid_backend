@@ -54,6 +54,9 @@ order is not important
 CHANGE LOG
 ----------
 
+### Version 1.0.4
+* Add backend manager for cqlengine models.
+
 ### Version 1.0.x
 
 * Initialize

@@ -27,6 +27,7 @@ def includeme(config):
 
     factories_path = settings.get('pyramid_backend.manager_factories', """
     pyramid_backend.backend_manager.sqlalchemy.factory
+    pyramid_backend.backend_manager.cqlengine.factory
     """)
     factories_path = filter(bool, re.split('\s+', factories_path))
     for factory in factories_path:

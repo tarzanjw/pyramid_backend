@@ -80,6 +80,9 @@ class AttrDisplayConf(object):
 
 
 class Manager(object):
+
+    __attr_display_conf_class__ = AttrDisplayConf
+
     def __init__(self, model):
         """
         :type model: class
@@ -87,6 +90,10 @@ class Manager(object):
         assert inspect.isclass(model)
         self.Model = model
         self.actions = OrderedDict()
+
+    @property
+    def column_names(self):
+        return []
 
     @reify
     def default_actions(self):
@@ -166,7 +173,7 @@ class Manager(object):
     def _make_attr_display_config(self, conf):
         if not isinstance(conf, (list, tuple)):
             conf = [conf, ]
-        return AttrDisplayConf(*conf)
+        return self.__attr_display_conf_class__(*conf)
 
     def __getattribute__(self, name):
         if name in Manager._configurable_properties:
@@ -249,6 +256,3 @@ class Manager(object):
 
     def find_object(self, id_value):
         raise NotImplementedError()
-
-
-from .sqlalchemy import SQLAlchemyManager

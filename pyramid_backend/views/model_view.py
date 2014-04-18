@@ -100,13 +100,14 @@ class ModelView(object):
     @property
     def breadcrumbs(self):
         cxt = self.context
-        cxts = reversed(list(lineage(cxt)))
+        cxts = list(reversed(list(lineage(cxt))))
         r = self.request
         if not r.view_name:
             if self.is_current_context_object:
                 cmd_name = 'detail'
             else:
                 cmd_name = 'list'
+            cxts = cxts[:-1]
         else:
             cmd_name = r.view_name
 
@@ -150,7 +151,6 @@ class ModelView(object):
         return {
             'view': self,
             'backend_mgr': self.backend_mgr,
-            # 'columns': self.backend_mgr.list__columns_to_display,
             'page': page,
         }
 
@@ -179,7 +179,8 @@ class ModelView(object):
         obj = self.context.object
         schema = self.model_schema_cls().bind(obj=obj)
         """:type schema: colander.Schema"""
-        appstruct = _none_to_colander_null(obj.__dict__)
+        appstruct = _none_to_colander_null({k: obj.__getattribute__(k)
+                                            for k in self.backend_mgr.column_names})
         form = deform.Form(schema,
                            appstruct=appstruct,
                            buttons=(deform.Button(title='Update'),
