@@ -37,21 +37,29 @@ td.datatype-datetime {text-align: right}
 </%def>
 
 <%def name="data_cell(val)">
-<%
-val_type = cell_datatype(val)
-raw_val = val
-val = unicode(markupsafe.escape(raw_val))
-if val_type == 'longtext':
-    val = '<br>'.join(val.splitlines())
-elif val_type == 'none':
-    val = '<code>' + val + '</code>'
-elif val_type == 'bool':
-    val = '<span class="label label-success">True</span>' if raw_val else \
-        '<span class="label label-default">False</span>'
-elif model_hepler.is_registered_model(raw_val):
-    val = '<a href="%s">%s</a>' % (_rsr.object_url(request, raw_val), val)
-%>
-${val|n}
+% if isinstance(val, (list, tuple, set)):
+    <ul class="list-unstyled">
+        % for a_val in val:
+            <li>${data_cell(a_val)}</li>
+        % endfor
+    </ul>
+% else:
+    <%
+    val_type = cell_datatype(val)
+    raw_val = val
+    val = unicode(markupsafe.escape(raw_val))
+    if val_type == 'longtext':
+        val = '<br>'.join(val.splitlines())
+    elif val_type == 'none':
+        val = '<code>' + val + '</code>'
+    elif val_type == 'bool':
+        val = '<span class="label label-success">True</span>' if raw_val else \
+            '<span class="label label-default">False</span>'
+    elif model_hepler.is_registered_model(raw_val):
+        val = '<a href="%s">%s</a>' % (_rsr.object_url(request, raw_val), val)
+    %>
+    ${val|n}
+% endif
 </%def>
 
 <%block name="breadcrumbs">
