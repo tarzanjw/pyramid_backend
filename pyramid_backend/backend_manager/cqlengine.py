@@ -92,6 +92,7 @@ class CQLEngineManager(Manager):
         return list(objs)[-limit:]
 
     def count_objects(self, filters):
+        return 10000
         criteria = []
         for name, value in filters.items():
             if name in self.column_names:
