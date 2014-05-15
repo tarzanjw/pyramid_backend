@@ -19,6 +19,7 @@ Usage
 
 For each model, the display configurations can be:
 
+    Model.__backend_id_attr__ = name of list of names in Model's primary key
     Model.__backend_schema_cls__ = a Colander/Deform Schema
     Model.__backend_slug__ = value to use on url, default = auto detect
     Model.__backend_display_name__ = display name for model, default = auto detect
@@ -54,7 +55,12 @@ order is not important
 CHANGE LOG
 ----------
 
+### Version 1.0.5
+
+* Add support for multi field primary key
+
 ### Version 1.0.4
+
 * Add backend manager for cqlengine models.
 
 ### Version 1.0.x

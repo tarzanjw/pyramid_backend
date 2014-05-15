@@ -183,6 +183,9 @@ class Manager(object):
                 val = getattr(self, '__default_' + name + '__')
             if name in Manager._display_config:
                 val = [self._make_attr_display_config(v) for v in val]
+            if name == 'id_attr':
+                if not isinstance(val, (list, tuple)):
+                    val = (val, )
             setattr(self, name, val)
             return val
         return super(Manager, self).__getattribute__(name)
@@ -227,6 +230,11 @@ class Manager(object):
 
         return resources.object_resource_class(self.Model)
 
+    def get_id_filters(self, id_value):
+        id_part_count = len(self.id_attr)
+        vals = str(id_value).split('-', id_part_count)
+        return dict(zip(self.id_attr, vals))
+
     def normalize_action(self, action_conf):
         assert bool(action_conf), 'Can not be empty configuration'
         if not isinstance(action_conf, (list, tuple,)):
@@ -240,7 +248,7 @@ class Manager(object):
         return action_name, action_conf
 
     def object_id(self, obj):
-        return getattr(obj, self.id_attr)
+        return u'-'.join([unicode(getattr(obj, attr_name)) for attr_name in self.id_attr])
 
     def create(self, data):
         raise NotImplementedError()
@@ -255,4 +263,6 @@ class Manager(object):
         raise NotImplementedError()
 
     def find_object(self, id_value):
-        raise NotImplementedError()
+        id_filters = self.get_id_filters(id_value)
+        objs = self.fetch_objects(id_filters)
+        return objs[0] if objs else None

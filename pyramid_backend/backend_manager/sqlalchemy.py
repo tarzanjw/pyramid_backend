@@ -129,5 +129,5 @@ if _sqlalchemy_is_available:
                     query = query.filter(self.column(name).like("%%%s%%" % value))
             return query.scalar()
 
-        def find_object(self, id_value):
-            return DBSession.query(self.Model).filter(self.column(self.id_attr) == id_value).first()
+        # def find_object(self, id_value):
+        #     return DBSession.query(self.Model).filter(self.column(self.id_attr) == id_value).first()

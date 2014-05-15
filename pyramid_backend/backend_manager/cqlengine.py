@@ -98,9 +98,3 @@ class CQLEngineManager(Manager):
             if name in self.column_names:
                 criteria.append(self.column(name) == value)
         return self.queryset.filter(*criteria).count()
-
-    def find_object(self, id_value):
-        try:
-            return self.queryset.get(self.column(self.id_attr) == id_value)
-        except (ValidationError, self.Model.DoesNotExist):
-            return None
