@@ -62,18 +62,6 @@ class CQLEngineManager(Manager):
         return getattr(self.Model, col_name)
 
     @property
-    def __default_list__columns_to_display__(self):
-        columns = OrderedDict(zip(self.column_names, [_name_to_words(n) for n in self.column_names]))
-        columns[self.id_attr] = '#'
-        return columns
-
-    @property
-    def __default_detail__columns_to_display__(self):
-        columns = OrderedDict(zip(self.column_names, [_name_to_words(n) for n in self.column_names]))
-        columns[self.id_attr] = '#'
-        return columns
-
-    @property
     def __default_detail__relations_to_display__(self):
         return []
 

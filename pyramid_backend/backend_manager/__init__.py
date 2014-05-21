@@ -90,7 +90,7 @@ class Manager(object):
 
     @property
     def column_names(self):
-        return []
+        return dir(self.Model)
 
     @reify
     def default_actions(self):
@@ -201,15 +201,14 @@ class Manager(object):
 
     @property
     def __default_list__columns_to_display__(self):
-        columns = dict(zip(dir(self.Model), dir(self.Model)))
-        columns[self.id_attr] = '#'
-        return columns
+        return OrderedDict(zip(
+            self.column_names,
+            [_name_to_words(n) for n in self.column_names]
+        ))
 
     @property
     def __default_detail__columns_to_display__(self):
-        columns = dict(zip(dir(self.Model), dir(self.Model)))
-        columns[self.id_attr] = '#'
-        return columns
+        return self.__default_list__columns_to_display__
 
     @property
     def __default_detail__relations_to_display__(self):

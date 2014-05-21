@@ -66,7 +66,8 @@ if _sqlalchemy_is_available:
                 return \
                     isinstance(attr, InstrumentedAttribute) \
                     and isinstance(attr.property, ColumnProperty)
-            return [attr_name for attr_name in dir(self.Model) if is_column(attr_name)]
+            col_names = [attr_name for attr_name in dir(self.Model) if is_column(attr_name)]
+            return list(self.id_attr) + [c for c in col_names if c not in self.id_attr]
 
         def column(self, col_name):
             return getattr(self.Model, col_name)
@@ -74,24 +75,6 @@ if _sqlalchemy_is_available:
         @property
         def _foreignkey_names(self):
             return [rel.key for rel in self.Model.__mapper__.relationships]
-
-        @property
-        def __default_list__columns_to_display__(self):
-            columns = OrderedDict(zip(
-                self.column_names,
-                [_name_to_words(n) for n in self.column_names]
-            ))
-            columns[self.id_attr] = '#'
-            return columns
-
-        @property
-        def __default_detail__columns_to_display__(self):
-            columns = OrderedDict(zip(
-                self.column_names,
-                [_name_to_words(n) for n in self.column_names]
-            ))
-            columns[self.id_attr] = '#'
-            return columns
 
         @property
         def __default_detail__relations_to_display__(self):

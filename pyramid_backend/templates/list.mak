@@ -27,7 +27,7 @@
                 val = adc.value(e)
                 val_type = view.cell_datatype(val)
             %>
-            % if adc.attr_name == backend_mgr.id_attr:
+            % if len(backend_mgr.id_attr) == 1 and adc.attr_name in backend_mgr.id_attr:
                 <td class="datatype-${val_type}"><a href="${_rsr.object_url(request, e)}">${val}</a></td>
             % else:
             <td class="datatype-${val_type}">${data_cell(val)}</td>
