@@ -17,10 +17,7 @@ def _name_to_words(name):
     name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     words = re.split('[_\s]+', name)
 
-    def capitalize(s):
-        return s[0].upper() + s[1:]
-
-    return ' '.join([capitalize(w) for w in words])
+    return ' '.join([w.title() for w in words])
 
 
 def create_backend_manager(model):

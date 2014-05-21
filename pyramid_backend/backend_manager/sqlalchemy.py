@@ -12,12 +12,17 @@ def factory(config):
 
 try:
     from sqlalchemy import func, Table
+    from sqlalchemy.orm.attributes import InstrumentedAttribute
+    from sqlalchemy.orm.properties import ColumnProperty
     _sqlalchemy_is_available = True
 except ImportError:  # sqlalchemy is not available
     _sqlalchemy_is_available = False
     func = object()
-
     class Table(object):
+        pass
+    class InstrumentedAttribute(object):
+        pass
+    class ColumnProperty(object):
         pass
 
 
@@ -56,7 +61,12 @@ if _sqlalchemy_is_available:
 
         @reify
         def column_names(self):
-            return [c.name for c in self.Model.__table__.columns]
+            def is_column(attr_name):
+                attr = getattr(self.Model, attr_name)
+                return \
+                    isinstance(attr, InstrumentedAttribute) \
+                    and isinstance(attr.property, ColumnProperty)
+            return [attr_name for attr_name in dir(self.Model) if is_column(attr_name)]
 
         def column(self, col_name):
             return getattr(self.Model, col_name)
