@@ -61,12 +61,13 @@ if _sqlalchemy_is_available:
 
         @reify
         def column_names(self):
-            def is_column(attr_name):
-                attr = getattr(self.Model, attr_name)
+            def is_column(col):
                 return \
-                    isinstance(attr, InstrumentedAttribute) \
-                    and isinstance(attr.property, ColumnProperty)
-            col_names = [attr_name for attr_name in dir(self.Model) if is_column(attr_name)]
+                    isinstance(col, InstrumentedAttribute) \
+                    and isinstance(col.property, ColumnProperty)
+            col_names_in_order = self.Model.__table__.columns.keys()
+            c2a = {c.name: a for a, c in self.Model.__dict__.items() if is_column(c)}
+            col_names = [c2a[col] for col in col_names_in_order]
             return list(self.id_attr) + [c for c in col_names if c not in self.id_attr]
 
         def column(self, col_name):
