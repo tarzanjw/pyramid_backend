@@ -5,6 +5,7 @@ import inspect
 import deform
 from webhelpers.paginate import Page
 from pyramid.httpexceptions import HTTPFound
+from pyramid.view import view_config
 from . import cell_datatype
 from .. import resources as _rsr
 import json
@@ -18,6 +19,24 @@ def _none_to_colander_null(data):
 
 def _colander_null_to_none(data):
     return {k: v if v is not colander.null else None for k, v in data.items()}
+
+
+class InvalidSchemaClassError(RuntimeError):
+    def __init__(self, backend_mgr):
+        """
+        :type backend_mgr: pyramid_backend.backend_manager.Manager
+        """
+        self.backend_mgr = backend_mgr
+        super(InvalidSchemaClassError, self).__init__('%s is not class for %s\'s schema'
+                                                      % (self.backend_mgr.schema_cls,
+                                                         self.backend_mgr.Model))
+
+
+@view_config(context=InvalidSchemaClassError, renderer='pyramid_backend:templates/no_schema.mak')
+def on_invalid_schema_class(context, request):
+    return {
+        'error': context,
+    }
 
 
 class ModelView(object):
@@ -49,9 +68,11 @@ class ModelView(object):
 
     @property
     def model_schema_cls(self):
-        assert inspect.isclass(self.backend_mgr.schema_cls), \
-            '%s.__backend_schema_cls__ (%s) is not a class' % \
-            (self.model.__name__, self.backend_mgr.schema_cls)
+        if not inspect.isclass(self.backend_mgr.schema_cls):
+            raise InvalidSchemaClassError(self.backend_mgr)
+        # assert inspect.isclass(self.backend_mgr.schema_cls), \
+        #     '%s.__backend_schema_cls__ (%s) is not a class' % \
+        #     (self.model.__name__, self.backend_mgr.schema_cls)
         return self.backend_mgr.schema_cls
 
     def cell_datatype(self, val):

@@ -260,5 +260,5 @@ class Manager(object):
 
     def find_object(self, id_value):
         id_filters = self.get_id_filters(id_value)
-        objs = self.fetch_objects(id_filters)
+        objs = list(self.fetch_objects(id_filters))
         return objs[0] if objs else None
