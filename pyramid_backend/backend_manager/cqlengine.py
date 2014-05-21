@@ -4,13 +4,20 @@ __author__ = 'tarzan'
 import inspect
 from collections import OrderedDict
 from pyramid.decorator import reify
-import importlib
 from . import Manager, _name_to_words, AttrDisplayConf as _BaseAttrDisplayConf
-from cqlengine.models import (
-    Model as CQLEngineModel,
-)
-from cqlengine.exceptions import  ValidationError
-from cqlengine.query import ModelQuerySet
+try:
+    from cqlengine.models import (
+        Model as CQLEngineModel,
+    )
+    from cqlengine.exceptions import  ValidationError
+    from cqlengine.query import ModelQuerySet
+except ImportError:
+    class CQLEngineModel(object):
+        pass
+    class ValidationError(object):
+        pass
+    class ModelQuerySet(object):
+        pass
 
 
 def factory(config):

@@ -116,14 +116,14 @@ if _sqlalchemy_is_available:
                     query = query.filter(self.column(name).like("%%%s%%" % value))
             limit = self.list__items_per_page
             offset = (page-1)*limit
-            id_col = self.column(self.id_attr)
-            query = query.order_by(id_col.desc())
+            id_cols = [self.column(id_attr) for id_attr in self.id_attr]
+            for id_col in id_cols:
+                query = query.order_by(id_col.desc())
             query = query.offset(offset).limit(limit)
             return query
 
         def count_objects(self, filters):
-            id_col = self.column(self.id_attr)
-            query = DBSession.query(func.count(id_col))
+            query = DBSession.query(func.count('*'))
             for name, value in filters.items():
                 if name in self.column_names:
                     query = query.filter(self.column(name).like("%%%s%%" % value))
