@@ -14,6 +14,8 @@ try:
     from sqlalchemy import func, Table
     from sqlalchemy.orm.attributes import InstrumentedAttribute
     from sqlalchemy.orm.properties import ColumnProperty
+    from sqlalchemy import inspect
+    from sqlalchemy.exc import NoInspectionAvailable
     _sqlalchemy_is_available = True
 except ImportError:  # sqlalchemy is not available
     _sqlalchemy_is_available = False
@@ -48,10 +50,8 @@ if _sqlalchemy_is_available:
             # verify model is an ORM class of SQLAlchemy or not
             # if not, just return None
             try:
-                table = model.__table__
-            except AttributeError:
-                return None
-            if not isinstance(table, Table):
+                mapper = inspect(model)
+            except NoInspectionAvailable:
                 return None
             return SQLAlchemyManager(model)
 
@@ -65,7 +65,7 @@ if _sqlalchemy_is_available:
                 return \
                     isinstance(col, InstrumentedAttribute) \
                     and isinstance(col.property, ColumnProperty)
-            col_names_in_order = self.Model.__table__.columns.keys()
+            col_names_in_order = inspect(self.Model).local_table.columns.keys()
             c2a = {c.name: a for a, c in self.Model.__dict__.items() if is_column(c)}
             col_names = [c2a[col] for col in col_names_in_order]
             return list(self.id_attr) + [c for c in col_names if c not in self.id_attr]
