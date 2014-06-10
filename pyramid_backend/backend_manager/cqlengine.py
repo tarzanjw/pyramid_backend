@@ -76,7 +76,7 @@ class CQLEngineManager(Manager):
     def delete(self, obj):
         obj.delete()
 
-    def fetch_objects(self, filters, page=1):
+    def fetch_objects(self, filters, fulltext=True, page=1):
         criteria = []
         for name, value in filters.items():
             if name in self.column_names:

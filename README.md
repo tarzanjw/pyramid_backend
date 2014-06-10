@@ -55,6 +55,10 @@ order is not important
 CHANGE LOG
 ----------
 
+# Version 1.0.7
+
+* Fix important bug for fetch_object from id
+
 ### Version 1.0.6
 
 * Make SQLAlchemy adatper more accurate

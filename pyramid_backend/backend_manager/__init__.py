@@ -252,7 +252,7 @@ class Manager(object):
     def update(self, obj, data):
         raise NotImplementedError()
 
-    def fetch_objects(self, filters, page=1):
+    def fetch_objects(self, filters, fulltext=True, page=1):
         raise NotImplementedError()
 
     def count_objects(self, filters):
@@ -260,5 +260,5 @@ class Manager(object):
 
     def find_object(self, id_value):
         id_filters = self.get_id_filters(id_value)
-        objs = list(self.fetch_objects(id_filters))
+        objs = list(self.fetch_objects(id_filters, fulltext=False))
         return objs[0] if objs else None

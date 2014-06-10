@@ -75,7 +75,7 @@ if _sqlalchemy_is_available:
 
         @property
         def _foreignkey_names(self):
-            return [rel.key for rel in self.Model.__mapper__.relationships]
+            return [rel.key for rel in inspect(self.Model).relationships]
 
         @property
         def __default_detail__relations_to_display__(self):
@@ -103,11 +103,15 @@ if _sqlalchemy_is_available:
             DBSession.delete(obj)
             DBSession.flush()
 
-        def fetch_objects(self, filters, page=1):
+        def fetch_objects(self, filters, fulltext=True, page=1):
             query = DBSession.query(self.Model)
             for name, value in filters.items():
                 if name in self.column_names:
-                    query = query.filter(self.column(name).like("%%%s%%" % value))
+                    if fulltext:
+                        query = query.filter(self.column(name)
+                                             .like("%%%s%%" % value))
+                    else:
+                        query = query.filter(self.column(name) == value)
             limit = self.list__items_per_page
             offset = (page-1)*limit
             id_cols = [self.column(id_attr) for id_attr in self.id_attr]
@@ -121,7 +125,5 @@ if _sqlalchemy_is_available:
             for name, value in filters.items():
                 if name in self.column_names:
                     query = query.filter(self.column(name).like("%%%s%%" % value))
-            return query.scalar()
 
-        # def find_object(self, id_value):
-        #     return DBSession.query(self.Model).filter(self.column(self.id_attr) == id_value).first()
+            return query.scalar()
