@@ -3,9 +3,11 @@ __author__ = 'tarzan'
 
 from collections import OrderedDict
 from pyramid.decorator import reify
-import importlib
+from paste.deploy.util import lookup_object
 from . import Manager, _name_to_words
+import logging
 
+logger = logging.getLogger(__name__)
 
 def factory(config):
     return lambda m: None
@@ -14,8 +16,8 @@ try:
     from sqlalchemy import func, Table
     from sqlalchemy.orm.attributes import InstrumentedAttribute
     from sqlalchemy.orm.properties import ColumnProperty
-    from sqlalchemy import inspect
-    from sqlalchemy.exc import NoInspectionAvailable
+    from sqlalchemy.orm import class_mapper
+    from sqlalchemy.orm.exc import UnmappedClassError
     _sqlalchemy_is_available = True
 except ImportError:  # sqlalchemy is not available
     _sqlalchemy_is_available = False
@@ -26,7 +28,8 @@ except ImportError:  # sqlalchemy is not available
         pass
     class ColumnProperty(object):
         pass
-
+    class UnmappedClassError(object):
+        pass
 
 if _sqlalchemy_is_available:
     DBSession = None
@@ -40,22 +43,38 @@ if _sqlalchemy_is_available:
         settings = config.get_settings()
         dbsession_path = settings.get('pyramid_backend.sqlalchemy.dbsession')
         if not dbsession_path:
+            logger.warn('You have not configured dbsession for pyramid_backend '
+                        'sqlalchemy adapter at '
+                        '"pyramid_backend.sqlalchemy.dbsession"')
             return lambda m: None
 
-        _module, _var = dbsession_path.rsplit('.', 1)
-        _module = importlib.import_module(_module, package=None)
-        DBSession = getattr(_module, _var)
+        DBSession = lookup_object(dbsession_path)
 
         def _create_manager(model):
             # verify model is an ORM class of SQLAlchemy or not
             # if not, just return None
             try:
-                mapper = inspect(model)
-            except NoInspectionAvailable:
+                mapper = class_mapper(model)
+            except UnmappedClassError:
                 return None
             return SQLAlchemyManager(model)
 
         return _create_manager
+
+
+    def get_db_session(model):
+        """
+        get DBSession for a model by order:
+          1. model.__dbsession__
+          2. global configured DBSession
+        :rtype : sqlalchemy.orm.session.Session
+        """
+        try:
+            return model.__dbsession__
+        except AttributeError:
+            model.__dbsession__ == DBSession
+            return DBSession
+
 
     class SQLAlchemyManager(Manager):
 
@@ -65,7 +84,7 @@ if _sqlalchemy_is_available:
                 return \
                     isinstance(col, InstrumentedAttribute) \
                     and isinstance(col.property, ColumnProperty)
-            col_names_in_order = inspect(self.Model).local_table.columns.keys()
+            col_names_in_order = class_mapper(self.Model).local_table.columns.keys()
             c2a = {c.name: a for a, c in self.Model.__dict__.items() if is_column(c)}
             col_names = [c2a[col] for col in col_names_in_order]
             return list(self.id_attr) + [c for c in col_names if c not in self.id_attr]
@@ -75,7 +94,7 @@ if _sqlalchemy_is_available:
 
         @property
         def _foreignkey_names(self):
-            return [rel.key for rel in inspect(self.Model).relationships]
+            return [rel.key for rel in class_mapper(self.Model).relationships]
 
         @property
         def __default_detail__relations_to_display__(self):
@@ -88,23 +107,23 @@ if _sqlalchemy_is_available:
             obj = self.Model()
             for k, v in data.items():
                 setattr(obj, k, v)
-            DBSession.add(obj)
-            DBSession.flush()
+            get_db_session(self.Model).add(obj)
+            get_db_session(self.Model).flush()
             return obj
 
         def update(self, obj, data):
             for k, v in data.items():
                 setattr(obj, k, v)
-            DBSession.merge(obj)
-            DBSession.flush()
+            get_db_session(self.Model).merge(obj)
+            get_db_session(self.Model).flush()
             return obj
 
         def delete(self, obj):
-            DBSession.delete(obj)
-            DBSession.flush()
+            get_db_session(self.Model).delete(obj)
+            get_db_session(self.Model).flush()
 
         def fetch_objects(self, filters, fulltext=True, page=1):
-            query = DBSession.query(self.Model)
+            query = get_db_session(self.Model).query(self.Model)
             for name, value in filters.items():
                 if name in self.column_names:
                     if fulltext:
@@ -121,7 +140,7 @@ if _sqlalchemy_is_available:
             return query
 
         def count_objects(self, filters):
-            query = DBSession.query(func.count('*'))
+            query = get_db_session(self.Model).query(func.count('*'))
             for name, value in filters.items():
                 if name in self.column_names:
                     query = query.filter(self.column(name).like("%%%s%%" % value))

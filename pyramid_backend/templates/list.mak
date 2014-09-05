@@ -1,4 +1,7 @@
-<%! from pyramid_backend import resources as _rsr %>
+<%!
+    import six
+    from pyramid_backend import resources as _rsr
+%>
 <%inherit file="_layout.mak"/>
 <%namespace file="_layout.mak" import="cmd_button, data_cell"/>
 
@@ -51,7 +54,7 @@
     )
 
     ## replace current page link
-    pager_html = unicode(pager_html)
+    pager_html = six.text_type(pager_html)
     pager_html = re.sub(
         r'<span[^>]+class="current-page">(.*?)</span>',
         r'<li class="active"><a href="#">\1 <span class="sr-only">(current)</span></a></li>',

@@ -41,7 +41,11 @@ order is not important
 
 ##### SQLAlchemy
 
-1. *pyramid_backend.sqlalchemy.dbsession*: the full path to Session object
+DBSession for a model will be searched in order: Model.__dbsession__, configured DBSession
+
+1. *pyramid_backend.sqlalchemy.dbsession*: the full path to Session object.
+    
+    I.e: app.db:DBSession
 
 ### API
 
@@ -54,6 +58,18 @@ order is not important
 
 CHANGE LOG
 ----------
+
+# Version 1.3.0
+
+* Add python3 support
+* Fixbug when cqlengine is not installed
+* SQLAlchemy: Support multi DBSession:
+  
+  * DBSession for a model will be searched in order: Model.__dbsession__, configured DBSession 
+
+# Version 1.1.0
+
+* Add python3 support
 
 # Version 1.0.7
 

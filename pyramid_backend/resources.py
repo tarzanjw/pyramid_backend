@@ -1,3 +1,5 @@
+import six
+
 __author__ = 'tarzan'
 
 import urllib
@@ -71,10 +73,13 @@ class ModelResource(object):
         return model_url(self.request, self.model)
 
     def __unicode__(self):
-        return unicode(self.model.__name__)
+        return six.text_type(self.model.__name__)
 
     def __str__(self):
-        return self.__unicode__().encode('utf-8')
+        if six.PY2:
+            return self.__unicode__().encode('utf-8')
+        else:
+            return self.model.__name__
 
 
 class ObjectResource(object):
@@ -97,7 +102,10 @@ class ObjectResource(object):
         return u'%s' % self.object
 
     def __str__(self):
-        return self.__unicode__().encode('utf-8')
+        if six.PY2:
+            return self.__unicode__().encode('utf-8')
+        else:
+            return str(self.object)
 
 
 _AUTO_CLASSES = {}

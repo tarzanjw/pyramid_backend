@@ -1,3 +1,5 @@
+import six
+
 __author__ = 'tarzan'
 import re
 import inspect
@@ -61,8 +63,8 @@ class AttrDisplayConf(object):
                     return arg
             return default
 
-        self.label = first_instance(basestring, _name_to_words(attr_name))
-        self.limit = first_instance((int, long), 5)
+        self.label = first_instance(six.string_types, _name_to_words(attr_name))
+        self.limit = first_instance(six.integer_types, 5)
 
     def values(self, obj):
         vals = self.value(obj)
@@ -244,7 +246,7 @@ class Manager(object):
         return action_name, action_conf
 
     def object_id(self, obj):
-        return u'-'.join([unicode(getattr(obj, attr_name)) for attr_name in self.id_attr])
+        return u'-'.join([six.text_type(getattr(obj, attr_name)) for attr_name in self.id_attr])
 
     def create(self, data):
         raise NotImplementedError()

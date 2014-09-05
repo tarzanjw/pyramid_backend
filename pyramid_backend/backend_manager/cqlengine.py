@@ -1,15 +1,13 @@
-from __future__ import absolute_import
 __author__ = 'tarzan'
 
 import inspect
-from collections import OrderedDict
 from pyramid.decorator import reify
 from . import Manager, _name_to_words, AttrDisplayConf as _BaseAttrDisplayConf
 try:
     from cqlengine.models import (
         Model as CQLEngineModel,
     )
-    from cqlengine.exceptions import  ValidationError
+    from cqlengine.exceptions import ValidationError
     from cqlengine.query import ModelQuerySet
 except ImportError:
     class CQLEngineModel(object):
@@ -78,9 +76,12 @@ class CQLEngineManager(Manager):
 
     def fetch_objects(self, filters, fulltext=True, page=1):
         criteria = []
-        for name, value in filters.items():
-            if name in self.column_names:
-                criteria.append(self.column(name) == value)
+        try:
+            for name, value in filters.items():
+                if name in self.column_names:
+                    criteria.append(self.column(name) == value)
+        except ValidationError:
+            return []
         limit = self.list__items_per_page
         offset = (page-1)*limit
         objs = self.queryset.filter(*criteria).limit(offset + limit)

@@ -1,3 +1,5 @@
+import six
+
 __author__ = 'tarzan'
 
 from pyramid.view import view_config
@@ -28,11 +30,11 @@ def cell_datatype(val):
         return 'none'
     if isinstance(val, bool):
         return 'bool'
-    if isinstance(val, (int, long, float)):
+    if isinstance(val, six.integer_types + (float, )):
         return 'number'
     if isinstance(val, datetime):
         return 'datetime'
-    if isinstance(val, basestring):
+    if isinstance(val, six.string_types):
         return 'longtext' if len(val) > 40 else 'text'
     if inspect.isclass(type(val)):
         return 'class'

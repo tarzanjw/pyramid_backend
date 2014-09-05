@@ -9,11 +9,11 @@ requires = [
     'pyramid >= 1.5a1',
     'deform',
     'pyramid_layout',
-    'webhelpers',
+    'six',
     ]
 
 setup(name='pyramid_backend',
-      version='1.0.7',
+      version='1.3.0',
       description='pyramid_backend',
       long_description=README,
       classifiers=[

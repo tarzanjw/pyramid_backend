@@ -2,7 +2,7 @@ __author__ = 'tarzan'
 
 import re
 import importlib
-from backend_manager import register_manager_factory
+from .backend_manager import register_manager_factory
 
 ADMIN_SITE_PATH = None
 

@@ -1,9 +1,13 @@
 __author__ = 'tarzan'
 
-import urllib
+import six
+if six.PY2:
+    from urllib import urlencode
+else:
+    from urllib.parse import urlencode
 import inspect
 import deform
-from webhelpers.paginate import Page
+from pyramid_backend.helpers.paginate import Page
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 from . import cell_datatype
@@ -153,7 +157,7 @@ class ModelView(object):
         params["_page"] = page
         if partial:
             params["partial"] = "1"
-        qs = urllib.urlencode(params, True)
+        qs = urlencode(params, True)
         return "%s?%s" % (self.request.path, qs)
 
     def action_list(self):
@@ -200,6 +204,8 @@ class ModelView(object):
         obj = self.context.object
         schema = self.model_schema_cls().bind(obj=obj)
         """:type schema: colander.Schema"""
+        for col_name in self.backend_mgr.id_attr:
+            del schema[col_name]
         appstruct = _none_to_colander_null({k: obj.__getattribute__(k)
                                             for k in self.backend_mgr.column_names})
         form = deform.Form(schema,

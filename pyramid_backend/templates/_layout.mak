@@ -1,4 +1,5 @@
 <%!
+    import six
     import markupsafe
     from pyramid_backend.views import cell_datatype
     from pyramid_backend import model as model_hepler, resources as _rsr
@@ -47,7 +48,7 @@ td.datatype-datetime {text-align: right}
     <%
     val_type = cell_datatype(val)
     raw_val = val
-    val = unicode(markupsafe.escape(raw_val))
+    val = six.text_type(markupsafe.escape(raw_val))
     if val_type == 'longtext':
         val = '<br>'.join(val.splitlines())
     elif val_type == 'none':
@@ -67,7 +68,7 @@ td.datatype-datetime {text-align: right}
 % if len(entries):
 <ul class="breadcrumb">
 % for e in entries:
-    % if isinstance(e, basestring):
+    % if isinstance(e, six.string_types):
         <li class="active">${e}</li>
     % else:
     <li><a href=${e['url']}>${e['label']}</a></li>
