@@ -59,6 +59,12 @@ DBSession for a model will be searched in order: Model.__dbsession__, configured
 CHANGE LOG
 ----------
 
+# Version 1.3.1
+
+* Fix some mirror bugs
+* Remove SQLAlchemy multi DBSession supporting. This feature will be do at 
+  engine binding from main project's scope.
+
 # Version 1.3.0
 
 * Add python3 support

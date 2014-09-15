@@ -62,20 +62,6 @@ if _sqlalchemy_is_available:
         return _create_manager
 
 
-    def get_db_session(model):
-        """
-        get DBSession for a model by order:
-          1. model.__dbsession__
-          2. global configured DBSession
-        :rtype : sqlalchemy.orm.session.Session
-        """
-        try:
-            return model.__dbsession__
-        except AttributeError:
-            model.__dbsession__ == DBSession
-            return DBSession
-
-
     class SQLAlchemyManager(Manager):
 
         @reify
@@ -107,23 +93,23 @@ if _sqlalchemy_is_available:
             obj = self.Model()
             for k, v in data.items():
                 setattr(obj, k, v)
-            get_db_session(self.Model).add(obj)
-            get_db_session(self.Model).flush()
+            DBSession.add(obj)
+            DBSession.flush()
             return obj
 
         def update(self, obj, data):
             for k, v in data.items():
                 setattr(obj, k, v)
-            get_db_session(self.Model).merge(obj)
-            get_db_session(self.Model).flush()
+            DBSession.merge(obj)
+            DBSession.flush()
             return obj
 
         def delete(self, obj):
-            get_db_session(self.Model).delete(obj)
-            get_db_session(self.Model).flush()
+            DBSession.delete(obj)
+            DBSession.flush()
 
         def fetch_objects(self, filters, fulltext=True, page=1):
-            query = get_db_session(self.Model).query(self.Model)
+            query = DBSession.query(self.Model)
             for name, value in filters.items():
                 if name in self.column_names:
                     if fulltext:
@@ -140,7 +126,9 @@ if _sqlalchemy_is_available:
             return query
 
         def count_objects(self, filters):
-            query = get_db_session(self.Model).query(func.count('*'))
+            cols = [getattr(self.Model, pk_col) for pk_col in self.id_attr]
+            query = DBSession.query(func.count(*cols))
+
             for name, value in filters.items():
                 if name in self.column_names:
                     query = query.filter(self.column(name).like("%%%s%%" % value))
