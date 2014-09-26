@@ -68,6 +68,8 @@ class CQLEngineManager(Manager):
         return obj
 
     def update(self, obj, data):
+        for attr_name in self.id_attr:
+            data.pop(attr_name, None)
         obj.update(**data)
         return obj
 
