@@ -59,6 +59,10 @@ DBSession for a model will be searched in order: Model.__dbsession__, configured
 CHANGE LOG
 ----------
 
+# Version 1.3.2
+
+* Fix error when update model schema contains primary key in cqlengine
+
 # Version 1.3.1
 
 * Fix some mirror bugs
