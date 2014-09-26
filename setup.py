@@ -14,7 +14,7 @@ requires = [
     ]
 
 setup(name='pyramid_backend',
-      version='1.3.2',
+      version='1.3.3',
       description='pyramid_backend',
       long_description=README,
       classifiers=[
