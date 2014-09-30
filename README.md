@@ -59,6 +59,10 @@ DBSession for a model will be searched in order: Model.__dbsession__, configured
 CHANGE LOG
 ----------
 
+# Version 1.3.4
+
+* Fix bugs at 1.3.2
+
 # Version 1.3.3
 
 * Mirror fixs for python 2.7

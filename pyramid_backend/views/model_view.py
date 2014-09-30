@@ -204,8 +204,6 @@ class ModelView(object):
         obj = self.context.object
         schema = self.model_schema_cls().bind(obj=obj)
         """:type schema: colander.Schema"""
-        for col_name in self.backend_mgr.id_attr:
-            del schema[col_name]
         appstruct = _none_to_colander_null({k: obj.__getattribute__(k)
                                             for k in self.backend_mgr.column_names})
         form = deform.Form(schema,
